@@ -105,6 +105,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .search-inp:focus{border-color:var(--accent)}
 .search-inp::placeholder{color:var(--text3)}
 .fsel{padding:5px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:.79rem;outline:none;cursor:pointer;font-family:var(--font)}
+.btn-import{padding:5px 12px;background:transparent;border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-size:.76rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:var(--font)}
+.btn-import:hover{border-color:var(--accent);color:var(--accent)}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.78rem}
 thead th{padding:7px 11px;text-align:left;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:.62rem;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -303,7 +305,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="savePO()">✓ Save Purchase Order</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel"><option>All Suppliers</option><option>Awlad Mahmoud</option><option>الندى</option></select><select class="fsel"><option>All Methods</option><option>Cash</option><option>Payment Terms</option></select><span class="tbl-sub">205 records</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel"><option>All Suppliers</option><option>Awlad Mahmoud</option><option>الندى</option></select><select class="fsel"><option>All Methods</option><option>Cash</option><option>Payment Terms</option></select><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><span class="tbl-sub">205 records</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th></tr></thead>
       <tbody id="tb-po">
@@ -358,7 +360,7 @@ body.locked>*:not(#authGate){display:none}
     </div>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Stock Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search model, product, brand…"/><select class="fsel"><option>All Status</option><option>✅ In Stock</option><option>⚠ Low</option><option>❌ Out</option></select><select class="fsel"><option>All Brands</option><option>Philips</option><option>Unionaire</option><option>LG</option><option>Sharp</option></select><span class="tbl-sub">663 SKUs</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Stock Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search model, product, brand…"/><select class="fsel"><option>All Status</option><option>✅ In Stock</option><option>⚠ Low</option><option>❌ Out</option></select><select class="fsel"><option>All Brands</option><option>Philips</option><option>Unionaire</option><option>LG</option><option>Sharp</option></select><button class="btn-import" onclick="triggerImport('inv')">📤 Import Excel</button><span class="tbl-sub">663 SKUs</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Model No.</th><th>Product</th><th>Brand</th><th>Avg Cost</th><th>Rcvd</th><th>Sold</th><th>Available</th><th>Stock Value</th><th>Status</th><th>Last Sale</th></tr></thead>
       <tbody id="tb-inv">
@@ -424,7 +426,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="saveSale()">✓ Save Sale</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, channel, order…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option><option>Raya</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option></select><span class="tbl-sub">1,843 transactions</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, channel, order…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option><option>Raya</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option></select><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub">1,843 transactions</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Channel</th><th>Model</th><th>Product</th><th>Brand</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th></tr></thead>
       <tbody id="tb-sales">
@@ -442,16 +444,16 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-ap">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">💳</div><div class="kpi-label">Total AP Outstanding</div><div class="kpi-value" style="color:var(--red)">843K</div><div class="kpi-sub">EGP · 30 vendors</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Paid (Jun)</div><div class="kpi-value" style="color:var(--green)">393K</div><div class="kpi-sub">EGP · this month</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">🧾</div><div class="kpi-label">New Bills (Jun)</div><div class="kpi-value">411K</div><div class="kpi-sub">EGP · 29 invoices</div></div>
-    <div class="kpi-card" style="--card-accent:var(--purple)"><div class="kpi-icon">⏰</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--purple)">6</div><div class="kpi-sub">vendors · EGP 13.4K</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">💳</div><div class="kpi-label">Total AP Outstanding</div><div class="kpi-value" style="color:var(--red)" id="ap-kpi-outstanding">843K</div><div class="kpi-sub" id="ap-kpi-outstanding-sub">EGP · 30 vendors</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Paid (Jun)</div><div class="kpi-value" style="color:var(--green)" id="ap-kpi-paid">393K</div><div class="kpi-sub">EGP · this month</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">🧾</div><div class="kpi-label">New Bills (Jun)</div><div class="kpi-value" id="ap-kpi-newbills">411K</div><div class="kpi-sub" id="ap-kpi-newbills-sub">EGP · 29 invoices</div></div>
+    <div class="kpi-card" style="--card-accent:var(--purple)"><div class="kpi-icon">⏰</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--purple)" id="ap-kpi-overdue">6</div><div class="kpi-sub" id="ap-kpi-overdue-sub">vendors · EGP 13.4K</div></div>
   </div>
   <div class="aging-grid">
-    <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)">EGP 838.1K</div><div class="aging-track"><div class="aging-fill" style="width:99%;background:var(--green)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--accent)">EGP 0</div><div class="aging-track"><div class="aging-fill" style="width:0%;background:var(--accent)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)">EGP 0</div><div class="aging-track"><div class="aging-fill" style="width:0%;background:var(--red)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)">EGP 13.4K</div><div class="aging-track"><div class="aging-fill" style="width:5%;background:var(--red)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)" id="ap-age-current">EGP 838.1K</div><div class="aging-track"><div class="aging-fill" id="ap-age-current-bar" style="width:99%;background:var(--green)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--accent)" id="ap-age-due">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ap-age-due-bar" style="width:0%;background:var(--accent)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)" id="ap-age-overdue">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ap-age-overdue-bar" style="width:0%;background:var(--red)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)" id="ap-age-critical">EGP 13.4K</div><div class="aging-track"><div class="aging-fill" id="ap-age-critical-bar" style="width:5%;background:var(--red)"></div></div></div>
   </div>
   <div class="form-panel">
     <div class="form-title">➕ Log AP Transaction</div>
@@ -467,7 +469,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="saveAP()">✓ Save AP Entry</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">AP Vendor Balances</div><input class="search-inp" type="text" placeholder="🔍 Search vendor…"/><select class="fsel"><option>All Status</option><option>Current</option><option>Due</option><option>Overdue</option><option>Critical</option></select><span class="tbl-sub">30 vendors · EGP 843K outstanding</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">AP Vendor Balances</div><input class="search-inp" type="text" placeholder="🔍 Search vendor…"/><select class="fsel"><option>All Status</option><option>Current</option><option>Due</option><option>Overdue</option><option>Critical</option></select><button class="btn-import" onclick="triggerImport('ap')">📤 Import Excel</button><span class="tbl-sub" id="ap-sub">30 vendors · EGP 843K outstanding</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Vendor</th><th>Opening Bal</th><th>Bills</th><th>Payments</th><th>Balance (EGP)</th><th>Aging</th><th>Status</th></tr></thead>
       <tbody id="tb-ap">
@@ -537,7 +539,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="saveAR()">✓ Save AR Entry</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">AR Receivables Register</div><input class="search-inp" type="text" placeholder="🔍 Search channel, invoice…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option></select><select class="fsel"><option>All Status</option><option>Pending</option><option>Received</option><option>Overdue</option></select><span class="tbl-sub">EGP 1.2M outstanding</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">AR Receivables Register</div><input class="search-inp" type="text" placeholder="🔍 Search channel, invoice…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option></select><select class="fsel"><option>All Status</option><option>Pending</option><option>Received</option><option>Overdue</option></select><button class="btn-import" onclick="triggerImport('ar')">📤 Import Excel</button><span class="tbl-sub">EGP 1.2M outstanding</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Channel</th><th>Type</th><th>Ref #</th><th>Invoice (EGP)</th><th>Commission</th><th>Net Receivable</th><th>Due Date</th><th>Status</th></tr></thead>
       <tbody id="tb-ar">
@@ -598,7 +600,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="saveExpense()">✓ Save Expense</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Expenses Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search description, category…"/><select class="fsel"><option>All Categories</option><option>Packaging</option><option>Logistics</option><option>Salaries</option><option>BNPL Fees</option><option>Storage</option></select><span class="tbl-sub">Jun 2026</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Expenses Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search description, category…"/><select class="fsel"><option>All Categories</option><option>Packaging</option><option>Logistics</option><option>Salaries</option><option>BNPL Fees</option><option>Storage</option></select><button class="btn-import" onclick="triggerImport('exp')">📤 Import Excel</button><span class="tbl-sub">Jun 2026</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount (EGP)</th><th>Pay Method</th><th>Vendor / Notes</th></tr></thead>
       <tbody id="tb-exp">
@@ -619,6 +621,9 @@ body.locked>*:not(#authGate){display:none}
   <div class="footer-meta">Senior GL Accountant · Mohamed Elgendy · IFRS Compliant · EGP</div>
 </footer>
 
+<input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="handleImportFile(event)"/>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
 
@@ -820,6 +825,243 @@ function saveAR(){
 }
 
 // ---------- Expenses ----------
+// ---------- Excel Import ----------
+function triggerImport(moduleKey){
+  window._importTarget = moduleKey;
+  const input = document.getElementById('excelFileInput');
+  input.value = '';
+  input.click();
+}
+
+function handleImportFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const target = window._importTarget;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true});
+      if(target==='ap') importAP(wb);
+      else if(target==='po') importGeneric(wb,'po');
+      else if(target==='sales') importGeneric(wb,'sales');
+      else if(target==='ar') importGeneric(wb,'ar');
+      else if(target==='exp') importGeneric(wb,'exp');
+      else if(target==='inv') importInventory(wb);
+    }catch(err){
+      toast('Import failed: '+err.message,'err');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function findSheet(wb, keywords){
+  for(const name of wb.SheetNames){
+    const lower = name.toLowerCase();
+    if(keywords.some(k=>lower.includes(k))) return wb.Sheets[name];
+  }
+  return wb.Sheets[wb.SheetNames[0]];
+}
+function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null}); }
+function pick(row, names){ for(const k of names){ if(row[k]!==undefined && row[k]!==null && row[k]!=='') return row[k]; } return null; }
+function toJsDate(v){
+  if(v instanceof Date) return v;
+  if(typeof v==='string'){ const d=new Date(v); return isNaN(d)?null:d; }
+  return null;
+}
+function fmtK(v){
+  const sign=v<0?'-':'';
+  const abs=Math.abs(v);
+  if(abs>=1000000) return sign+(abs/1000000).toFixed(2).replace(/\.?0+$/,'')+'M';
+  if(abs>=1000) return sign+(abs/1000).toFixed(1).replace(/\.0$/,'')+'K';
+  return sign+abs.toFixed(0);
+}
+
+function importAP(wb){
+  const sheet = findSheet(wb, ['transaction','log']);
+  const rows = sheetRows(sheet);
+  const vendors = {};
+  let juneBills=0, juneBillCount=0, junePayments=0;
+  const now = new Date();
+  rows.forEach(row=>{
+    const vendor = pick(row,['Vendor Name','Vendor']);
+    if(!vendor) return;
+    const date = toJsDate(pick(row,['Date']));
+    const type = pick(row,['Transaction Type','Type']) || '';
+    const bill = Number(pick(row,['Bill Amount (EGP)','Bill Amount','Bill'])) || 0;
+    const pay = Number(pick(row,['Payment Amount (EGP)','Payment Amount','Payment'])) || 0;
+    if(!vendors[vendor]) vendors[vendor]={opening:0,bills:0,payments:0,last:null};
+    const v=vendors[vendor];
+    if(type==='Opening Balance') v.opening += bill-pay;
+    else if(type==='Vendor Bill') v.bills += bill;
+    else if(type==='Payment') v.payments += pay;
+    else if(type==='Returns'||type==='Credit Note') v.payments += pay;
+    else { v.bills+=bill; v.payments+=pay; }
+    if(date && (!v.last || date>v.last)) v.last=date;
+    if(date && date.getFullYear()===now.getFullYear() && date.getMonth()===now.getMonth()){
+      if(type==='Vendor Bill'){ juneBills+=bill; juneBillCount++; }
+      if(type==='Payment') junePayments+=pay;
+    }
+  });
+  const list = Object.keys(vendors).map(name=>{
+    const v=vendors[name];
+    const balance = Math.round((v.opening+v.bills-v.payments)*100)/100;
+    const days = v.last ? Math.floor((now-v.last)/86400000) : 9999;
+    return {vendor:name, opening:v.opening, bills:v.bills, payments:v.payments, balance, days};
+  }).sort((a,b)=>b.balance-a.balance);
+
+  const totalOutstanding = list.reduce((s,x)=>s+x.balance,0);
+  const payable = list.filter(x=>x.balance>0.01);
+  const overdue30 = payable.filter(x=>x.days>30);
+  const buckets={c:0,d:0,o:0,cr:0};
+  payable.forEach(x=>{
+    if(x.days<=30) buckets.c+=x.balance;
+    else if(x.days<=60) buckets.d+=x.balance;
+    else if(x.days<=90) buckets.o+=x.balance;
+    else buckets.cr+=x.balance;
+  });
+  const maxBucket = Math.max(buckets.c,buckets.d,buckets.o,buckets.cr,1);
+
+  function bucketInfo(days){
+    if(days<=30) return ['0-30d','p-green','Current'];
+    if(days<=60) return ['31-60d','p-amber','Due'];
+    if(days<=90) return ['61-90d','p-red','Overdue'];
+    return ['>90d','p-red','Critical'];
+  }
+  const rowsHtml = list.map(x=>{
+    const [ageLabel,agePill,status]=bucketInfo(x.days);
+    const balColor = x.balance>0?'var(--red)':'var(--green)';
+    const rtl = /[؀-ۿ]/.test(x.vendor) ? 'direction:rtl' : '';
+    return `<tr><td style="font-weight:600;${rtl}">${x.vendor}</td><td class="amt">${fmt(x.opening)}</td><td class="amt">${fmt(x.bills)}</td><td class="amt" style="color:var(--green)">${fmt(x.payments)}</td><td class="amt" style="color:${balColor}">${fmt(x.balance)}</td><td><span class="pill ${agePill}">${ageLabel}</span></td><td><span class="pill ${agePill}">${status}</span></td></tr>`;
+  }).join('');
+  document.getElementById('tb-ap').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="7" style="text-align:center;color:var(--text2);padding:22px">No records found in sheet</td></tr>';
+
+  document.getElementById('ap-kpi-outstanding').textContent = fmtK(totalOutstanding);
+  document.getElementById('ap-kpi-outstanding-sub').textContent = 'EGP · '+list.length+' vendors';
+  document.getElementById('ap-kpi-paid').textContent = fmtK(junePayments);
+  document.getElementById('ap-kpi-newbills').textContent = fmtK(juneBills);
+  document.getElementById('ap-kpi-newbills-sub').textContent = 'EGP · '+juneBillCount+' invoices';
+  document.getElementById('ap-kpi-overdue').textContent = overdue30.length;
+  document.getElementById('ap-kpi-overdue-sub').textContent = 'vendors · EGP '+fmtK(overdue30.reduce((s,x)=>s+x.balance,0));
+  document.getElementById('ap-age-current').textContent = 'EGP '+fmtK(buckets.c);
+  document.getElementById('ap-age-current-bar').style.width = Math.max(4,buckets.c/maxBucket*100)+'%';
+  document.getElementById('ap-age-due').textContent = 'EGP '+fmtK(buckets.d);
+  document.getElementById('ap-age-due-bar').style.width = Math.max(buckets.d?4:0,buckets.d/maxBucket*100)+'%';
+  document.getElementById('ap-age-overdue').textContent = 'EGP '+fmtK(buckets.o);
+  document.getElementById('ap-age-overdue-bar').style.width = Math.max(buckets.o?4:0,buckets.o/maxBucket*100)+'%';
+  document.getElementById('ap-age-critical').textContent = 'EGP '+fmtK(buckets.cr);
+  document.getElementById('ap-age-critical-bar').style.width = Math.max(buckets.cr?4:0,buckets.cr/maxBucket*100)+'%';
+  const sub = document.getElementById('ap-sub');
+  if(sub) sub.textContent = list.length+' vendors · EGP '+fmtK(totalOutstanding)+' outstanding';
+
+  toast('Imported '+rows.length+' transactions · '+list.length+' vendors','ok');
+}
+
+function importInventory(wb){
+  const sheet = findSheet(wb, ['stock','inventory','ledger']);
+  const rows = sheetRows(sheet).filter(r=>pick(r,['Model No.','Model']));
+  const html = rows.map(r=>{
+    const model = pick(r,['Model No.','Model']);
+    const product = pick(r,['Product Name (AR)','Product']) || '';
+    const brand = pick(r,['Brand']) || '—';
+    const avgCost = Number(pick(r,['Avg Cost','Average Cost'])) || 0;
+    const rcvd = Number(pick(r,['Qty Received','Rcvd'])) || 0;
+    const sold = Number(pick(r,['Qty Sold','Sold'])) || 0;
+    const available = pick(r,['Available']) !== null ? Number(pick(r,['Available'])) : rcvd-sold;
+    const stockValue = avgCost*available;
+    const lastSale = toJsDate(pick(r,['Last Sale']));
+    let pill='p-green', label='✅ In', availColor='var(--green)';
+    if(available===0){pill='p-red';label='❌ Out';availColor='var(--text2)';}
+    else if(available<0){pill='p-red';label='❌ Neg';availColor='var(--red)';}
+    else if(available<=3){pill='p-amber';label='⚠ Low';availColor='var(--accent)';}
+    return `<tr><td class="mono">${model}</td><td class="rtl">${product}</td><td>${brand}</td><td class="amt">${fmt(avgCost)}</td><td class="mono">${rcvd}</td><td class="mono">${sold}</td><td class="mono" style="color:${availColor}">${available}</td><td class="amt" style="color:${stockValue<0?'var(--red)':''}">${fmt(stockValue)}</td><td><span class="pill ${pill}">${label}</span></td><td style="color:var(--text2);font-size:.7rem">${lastSale?todayStrFromDate(lastSale):'—'}</td></tr>`;
+  }).join('');
+  if(html) document.getElementById('tb-inv').innerHTML = html;
+  toast('Imported '+rows.length+' SKUs into Inventory','ok');
+}
+
+function todayStrFromDate(d){ return d.toLocaleDateString('en-GB'); }
+
+const IMPORT_MAPS = {
+  po: {
+    tbody:'tb-po',
+    build: r=>{
+      const date = toJsDate(pick(r,['Date'])) || new Date();
+      const sup = pick(r,['Supplier']) || '—';
+      const model = pick(r,['Model No.','Model']) || '—';
+      const prod = pick(r,['Product Name (AR)','Product']) || '';
+      const qty = Number(pick(r,['Qty Ordered','Qty'])) || 0;
+      const unit = Number(pick(r,['Unit Cost (EGP)','Unit Cost'])) || 0;
+      const method = pick(r,['Pay Method','Method']) || 'Cash';
+      const paid = Number(pick(r,['Amount Paid','Paid'])) || 0;
+      const total = qty*unit, bal = total-paid;
+      const methodPill = method==='Cash'?'p-green':method==='Payment Terms'?'p-amber':'p-blue';
+      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td style="font-weight:500">${sup}</td><td class="mono">${model}</td><td class="rtl">${prod}</td><td class="mono">${qty}</td><td class="amt">${fmt(unit)}</td><td class="amt">${fmt(total)}</td><td><span class="pill ${methodPill}">${method}</span></td><td class="amt">${fmt(paid)}</td><td class="amt" style="color:${bal>0?'var(--red)':'var(--green)'}">${fmt(bal)}</td></tr>`;
+    }
+  },
+  sales: {
+    tbody:'tb-sales',
+    build: r=>{
+      const date = toJsDate(pick(r,['Sale Date','Date'])) || new Date();
+      const ch = pick(r,['Channel']) || 'In Store';
+      const model = pick(r,['Model No.','Model']) || '—';
+      const prod = pick(r,['Product Name (AR)','Product']) || '';
+      const brand = pick(r,['Brand']) || '—';
+      const qty = Number(pick(r,['Qty Sold','Qty'])) || 1;
+      const amt = Number(pick(r,['Sale Amount (EGP)','Sale Amount'])) || 0;
+      const cost = Number(pick(r,['Cost Amount (EGP)','Cost Amount'])) || 0;
+      const status = pick(r,['Payment Status','Status']) || 'Paid';
+      const gp = amt-cost, pct = amt?(gp/amt*100):0;
+      const statusPill = status==='Paid'?'p-green':status==='Pending'?'p-amber':'p-blue';
+      const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+      const c = chColors[ch] || ['139,148,158','var(--text2)'];
+      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td class="mono">${model}</td><td class="rtl">${prod}</td><td>${brand}</td><td class="mono">${qty}</td><td class="amt">${fmt(amt)}</td><td class="amt">${fmt(cost)}</td><td class="amt" style="color:${gp>=0?'var(--green)':'var(--red)'}">${fmt(gp)}</td><td class="mono" style="color:${gp>=0?'var(--green)':'var(--red)'}">${pct.toFixed(1)}%</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
+    }
+  },
+  ar: {
+    tbody:'tb-ar',
+    build: r=>{
+      const date = toJsDate(pick(r,['Date'])) || new Date();
+      const ch = pick(r,['Customer / Channel','Channel']) || 'Jumia';
+      const type = pick(r,['Transaction Type','Type']) || 'Sales Invoice';
+      const ref = pick(r,['Invoice / Ref #','Ref']) || '—';
+      const inv = Number(pick(r,['Invoice Amount (EGP)','Invoice Amount'])) || 0;
+      const comm = Number(pick(r,['Commission %','Commission'])) || 0;
+      const net = inv*(1-comm/100);
+      const status = pick(r,['Payment Status','Status']) || 'Pending';
+      const statusPill = status==='Received'?'p-green':status==='Pending'?'p-amber':'p-blue';
+      const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+      const c = chColors[ch] || ['139,148,158','var(--text2)'];
+      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td>${type}</td><td class="mono">${ref}</td><td class="amt">${fmt(inv)}</td><td class="mono">${comm.toFixed(1)}%</td><td class="amt" style="color:var(--blue)">${fmt(net)}</td><td style="color:var(--text2);font-size:.7rem">—</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
+    }
+  },
+  exp: {
+    tbody:'tb-exp',
+    build: r=>{
+      const date = toJsDate(pick(r,['Date'])) || new Date();
+      const cat = pick(r,['Category']) || 'Other';
+      const desc = pick(r,['Description']) || '—';
+      const amount = Number(pick(r,['Amount (EGP)','Amount'])) || 0;
+      const method = pick(r,['Pay Method','Method']) || 'Cash';
+      const notes = pick(r,['Vendor / Notes','Notes']) || '—';
+      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="pill p-amber">${cat}</span></td><td>${desc}</td><td class="amt" style="color:var(--red)">${fmt(amount)}</td><td>${method}</td><td style="color:var(--text2);font-size:.7rem">${notes}</td></tr>`;
+    }
+  },
+};
+
+function importGeneric(wb, key){
+  const sheet = findSheet(wb, [key, key==='po'?'purchas':'', key==='exp'?'expense':'']);
+  const rows = sheetRows(sheet);
+  const cfg = IMPORT_MAPS[key];
+  const html = rows.map(cfg.build).join('');
+  if(html){
+    const tbody = document.getElementById(cfg.tbody);
+    const empty = tbody.querySelector('.empty-row');
+    if(empty) empty.remove();
+    tbody.insertAdjacentHTML('afterbegin', html);
+  }
+  toast('Imported '+rows.length+' rows','ok');
+}
+
 function saveExpense(){
   const desc=document.getElementById('exp-desc').value.trim();
   const amt=n(document.getElementById('exp-amt').value);
