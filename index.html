@@ -9,7 +9,8 @@
 :root{
   --bg:#0D1117;--surface:#161B22;--surface2:#1C2330;
   --border:#21262D;--border2:#30363D;
-  --accent:#E8A020;--accent2:#F5C842;
+  --accent:#16A34A;--accent2:#4ADE80;
+  --amber:#E8A020;--amber2:#F5C842;
   --green:#3FB950;--red:#F85149;--blue:#58A6FF;--purple:#BC8CFF;
   --text:#E6EDF3;--text2:#8B949E;--text3:#6E7681;
   --radius:10px;--radius-lg:16px;
@@ -32,7 +33,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 
 /* HERO */
 .hero{padding:64px 28px 48px;max-width:1200px;margin:0 auto;text-align:center}
-.eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.3);border-radius:99px;padding:4px 14px;font-size:.7rem;font-weight:600;color:var(--accent);letter-spacing:.07em;text-transform:uppercase;margin-bottom:20px}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);border-radius:99px;padding:4px 14px;font-size:.7rem;font-weight:600;color:var(--accent);letter-spacing:.07em;text-transform:uppercase;margin-bottom:20px}
 .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .hero h1{font-size:clamp(1.8rem,3.6vw,3rem);font-weight:700;letter-spacing:-.03em;line-height:1.12;margin-bottom:16px}
@@ -131,7 +132,7 @@ td.amt{font-family:var(--mono);font-size:.74rem}
 .pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:.64rem;font-weight:600;white-space:nowrap}
 .p-green{background:rgba(63,185,80,.15);color:var(--green)}
 .p-red{background:rgba(248,81,73,.15);color:var(--red)}
-.p-amber{background:rgba(232,160,32,.15);color:var(--accent)}
+.p-amber{background:rgba(232,160,32,.15);color:var(--amber)}
 .p-blue{background:rgba(88,166,255,.15);color:var(--blue)}
 .p-grey{background:rgba(139,148,158,.15);color:var(--text2)}
 .p-purple{background:rgba(188,140,255,.15);color:var(--purple)}
@@ -334,7 +335,7 @@ body.locked>*:not(#authGate){display:none}
   <div class="kpi-grid">
     <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">📦</div><div class="kpi-label">Total SKUs</div><div class="kpi-value">663</div><div class="kpi-sub">14 added this month</div></div>
     <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">In Stock</div><div class="kpi-value" style="color:var(--green)">420</div><div class="kpi-sub">63% of total SKUs</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">⚠️</div><div class="kpi-label">Low Stock (≤3)</div><div class="kpi-value" style="color:var(--accent)">47</div><div class="kpi-sub">Needs reorder</div></div>
+    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⚠️</div><div class="kpi-label">Low Stock (≤3)</div><div class="kpi-value" style="color:var(--amber)">47</div><div class="kpi-sub">Needs reorder</div></div>
     <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❌</div><div class="kpi-label">Out of Stock</div><div class="kpi-value" style="color:var(--red)">93</div><div class="kpi-sub">Revenue at risk</div></div>
     <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">💰</div><div class="kpi-label">Stock Value (WAC)</div><div class="kpi-value" style="color:var(--blue)">18.4M</div><div class="kpi-sub">EGP · IAS 2 basis</div></div>
   </div>
@@ -361,7 +362,7 @@ body.locked>*:not(#authGate){display:none}
         </svg>
         <div class="dlegend">
           <div class="dleg-item"><div class="dleg-dot" style="background:var(--green)"></div>In Stock · 420</div>
-          <div class="dleg-item"><div class="dleg-dot" style="background:var(--accent)"></div>Low Stock · 47</div>
+          <div class="dleg-item"><div class="dleg-dot" style="background:var(--amber)"></div>Low Stock · 47</div>
           <div class="dleg-item"><div class="dleg-dot" style="background:var(--red)"></div>Out of Stock · 93</div>
           <div class="dleg-item"><div class="dleg-dot" style="background:var(--text3)"></div>Negative · 55</div>
         </div>
@@ -375,9 +376,9 @@ body.locked>*:not(#authGate){display:none}
       <tbody id="tb-inv">
         <tr><td class="mono">HD9270/90</td><td class="rtl">قلايه هوائيه فيلبس 6.2 لتر</td><td>Philips</td><td class="amt">5,121.50</td><td class="mono">113</td><td class="mono">114</td><td class="mono" style="color:var(--red)">-1</td><td class="amt" style="color:var(--red)">(5,121.50)</td><td><span class="pill p-red">❌ Out</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
         <tr><td class="mono">UFN205LBLVADH</td><td class="rtl">ديب فريزر يونيون اير 205 لتر</td><td>Unionaire</td><td class="amt">13,440.48</td><td class="mono">42</td><td class="mono">38</td><td class="mono" style="color:var(--green)">4</td><td class="amt">53,761.90</td><td><span class="pill p-green">✅ In</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس 18 بوصة</td><td>Prifix</td><td class="amt">8,377.14</td><td class="mono">28</td><td class="mono">25</td><td class="mono" style="color:var(--accent)">3</td><td class="amt">25,131.43</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">R-77AT-ST</td><td class="rtl">ميكرويف شارب بشواية 34 لتر</td><td>Sharp</td><td class="amt">6,727.27</td><td class="mono">44</td><td class="mono">43</td><td class="mono" style="color:var(--accent)">1</td><td class="amt">6,727.27</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">DVS05020S</td><td class="rtl">غسالة أطباق بيكو 10 فرد</td><td>Beko</td><td class="amt">15,976.67</td><td class="mono">15</td><td class="mono">14</td><td class="mono" style="color:var(--accent)">1</td><td class="amt">15,976.67</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
+        <tr><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس 18 بوصة</td><td>Prifix</td><td class="amt">8,377.14</td><td class="mono">28</td><td class="mono">25</td><td class="mono" style="color:var(--amber)">3</td><td class="amt">25,131.43</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
+        <tr><td class="mono">R-77AT-ST</td><td class="rtl">ميكرويف شارب بشواية 34 لتر</td><td>Sharp</td><td class="amt">6,727.27</td><td class="mono">44</td><td class="mono">43</td><td class="mono" style="color:var(--amber)">1</td><td class="amt">6,727.27</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
+        <tr><td class="mono">DVS05020S</td><td class="rtl">غسالة أطباق بيكو 10 فرد</td><td>Beko</td><td class="amt">15,976.67</td><td class="mono">15</td><td class="mono">14</td><td class="mono" style="color:var(--amber)">1</td><td class="amt">15,976.67</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -409,7 +410,7 @@ body.locked>*:not(#authGate){display:none}
     </div>
     <div class="chart-card">
       <div class="chart-title">Sales by Channel (MTD)</div>
-      <div class="prog-row"><span class="prog-label">Jumia</span><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--accent)"></div></div><span class="prog-val">34%</span></div>
+      <div class="prog-row"><span class="prog-label">Jumia</span><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--amber)"></div></div><span class="prog-val">34%</span></div>
       <div class="prog-row"><span class="prog-label">Noon</span><div class="prog-track"><div class="prog-fill" style="width:74%;background:var(--blue)"></div></div><span class="prog-val">25%</span></div>
       <div class="prog-row"><span class="prog-label">B Tech</span><div class="prog-track"><div class="prog-fill" style="width:53%;background:var(--green)"></div></div><span class="prog-val">18%</span></div>
       <div class="prog-row"><span class="prog-label">Raneen</span><div class="prog-track"><div class="prog-fill" style="width:35%;background:var(--purple)"></div></div><span class="prog-val">12%</span></div>
@@ -439,7 +440,7 @@ body.locked>*:not(#authGate){display:none}
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Channel</th><th>Model</th><th>Product</th><th>Brand</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th></tr></thead>
       <tbody id="tb-sales">
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--accent)">Jumia</span></td><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس</td><td>Prifix</td><td class="mono">2</td><td class="amt">20,000.00</td><td class="amt">16,754.28</td><td class="amt" style="color:var(--green)">3,245.72</td><td class="mono" style="color:var(--green)">16.2%</td><td><span class="pill p-green">Paid</span></td></tr>
+        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--amber)">Jumia</span></td><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس</td><td>Prifix</td><td class="mono">2</td><td class="amt">20,000.00</td><td class="amt">16,754.28</td><td class="amt" style="color:var(--green)">3,245.72</td><td class="mono" style="color:var(--green)">16.2%</td><td><span class="pill p-green">Paid</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(88,166,255,.12);color:var(--blue)">Noon</span></td><td class="mono">UFN205</td><td class="rtl">فريزر يونيون اير</td><td>Unionaire</td><td class="mono">1</td><td class="amt">16,500.00</td><td class="amt">13,440.48</td><td class="amt" style="color:var(--green)">3,059.52</td><td class="mono" style="color:var(--green)">18.5%</td><td><span class="pill p-green">Paid</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(63,185,80,.12);color:var(--green)">B Tech</span></td><td class="mono">MH8265DIS</td><td class="rtl">ميكروويف LG NeoChef</td><td>LG</td><td class="mono">1</td><td class="amt">9,500.00</td><td class="amt">8,159.09</td><td class="amt" style="color:var(--green)">1,340.91</td><td class="mono" style="color:var(--green)">14.1%</td><td><span class="pill p-amber">Pending</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(188,140,255,.12);color:var(--purple)">Raneen</span></td><td class="mono">R-77AT-ST</td><td class="rtl">ميكرويف شارب 34 لتر</td><td>Sharp</td><td class="mono">1</td><td class="amt">7,800.00</td><td class="amt">6,727.27</td><td class="amt" style="color:var(--green)">1,072.73</td><td class="mono" style="color:var(--green)">13.8%</td><td><span class="pill p-green">Paid</span></td></tr>
@@ -466,7 +467,7 @@ body.locked>*:not(#authGate){display:none}
   </div>
   <div class="aging-grid">
     <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)" id="ap-age-current">EGP 838.1K</div><div class="aging-track"><div class="aging-fill" id="ap-age-current-bar" style="width:99%;background:var(--green)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--accent)" id="ap-age-due">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ap-age-due-bar" style="width:0%;background:var(--accent)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--amber)" id="ap-age-due">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ap-age-due-bar" style="width:0%;background:var(--amber)"></div></div></div>
     <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)" id="ap-age-overdue">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ap-age-overdue-bar" style="width:0%;background:var(--red)"></div></div></div>
     <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)" id="ap-age-critical">EGP 13.4K</div><div class="aging-track"><div class="aging-fill" id="ap-age-critical-bar" style="width:5%;background:var(--red)"></div></div></div>
   </div>
@@ -558,12 +559,12 @@ body.locked>*:not(#authGate){display:none}
   <div class="kpi-grid">
     <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">📥</div><div class="kpi-label">Total AR Outstanding</div><div class="kpi-value" style="color:var(--blue)">1.2M</div><div class="kpi-sub">EGP · all channels</div></div>
     <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Collected (MTD)</div><div class="kpi-value" style="color:var(--green)">3.6M</div><div class="kpi-sub">EGP · settled invoices</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">⏳</div><div class="kpi-label">Pending Settlement</div><div class="kpi-value" style="color:var(--accent)">312K</div><div class="kpi-sub">EGP · Jumia + Noon</div></div>
+    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⏳</div><div class="kpi-label">Pending Settlement</div><div class="kpi-value" style="color:var(--amber)">312K</div><div class="kpi-sub">EGP · Jumia + Noon</div></div>
     <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❗</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--red)">88K</div><div class="kpi-sub">EGP · Raneen</div></div>
   </div>
   <div class="aging-grid">
     <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)">EGP 824K</div><div class="aging-track"><div class="aging-fill" style="width:90%;background:var(--green)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--accent)">EGP 200K</div><div class="aging-track"><div class="aging-fill" style="width:45%;background:var(--accent)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--amber)">EGP 200K</div><div class="aging-track"><div class="aging-fill" style="width:45%;background:var(--amber)"></div></div></div>
     <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)">EGP 88K</div><div class="aging-track"><div class="aging-fill" style="width:25%;background:var(--red)"></div></div></div>
     <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)">EGP 88K</div><div class="aging-track"><div class="aging-fill" style="width:20%;background:var(--red)"></div></div></div>
   </div>
@@ -586,7 +587,7 @@ body.locked>*:not(#authGate){display:none}
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Channel</th><th>Type</th><th>Ref #</th><th>Invoice (EGP)</th><th>Commission</th><th>Net Receivable</th><th>Due Date</th><th>Status</th></tr></thead>
       <tbody id="tb-ar">
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--accent)">Jumia</span></td><td>Settlement</td><td class="mono">JUM-SEL-0612</td><td class="amt">312,000.00</td><td class="mono">12.0%</td><td class="amt" style="color:var(--blue)">274,560.00</td><td style="color:var(--text2);font-size:.7rem">30/06/2026</td><td><span class="pill p-amber">Pending</span></td></tr>
+        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--amber)">Jumia</span></td><td>Settlement</td><td class="mono">JUM-SEL-0612</td><td class="amt">312,000.00</td><td class="mono">12.0%</td><td class="amt" style="color:var(--blue)">274,560.00</td><td style="color:var(--text2);font-size:.7rem">30/06/2026</td><td><span class="pill p-amber">Pending</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">15/06/2026</td><td><span class="badge" style="background:rgba(88,166,255,.12);color:var(--blue)">Noon</span></td><td>Settlement</td><td class="mono">NOON-0615</td><td class="amt">185,000.00</td><td class="mono">10.5%</td><td class="amt" style="color:var(--blue)">165,575.00</td><td style="color:var(--text2);font-size:.7rem">25/06/2026</td><td><span class="pill p-amber">Pending</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">10/06/2026</td><td><span class="badge" style="background:rgba(63,185,80,.12);color:var(--green)">B Tech</span></td><td>Invoice</td><td class="mono">BTECH-0610</td><td class="amt">95,000.00</td><td class="mono">0.0%</td><td class="amt" style="color:var(--green)">95,000.00</td><td style="color:var(--text2);font-size:.7rem">10/07/2026</td><td><span class="pill p-green">Received</span></td></tr>
         <tr><td style="color:var(--text2);font-size:.7rem">01/05/2026</td><td><span class="badge" style="background:rgba(188,140,255,.12);color:var(--purple)">Raneen</span></td><td>Invoice</td><td class="mono">RAN-0501</td><td class="amt">88,000.00</td><td class="mono">8.0%</td><td class="amt" style="color:var(--red)">80,960.00</td><td style="color:var(--red);font-size:.7rem">31/05/2026</td><td><span class="pill p-red">Overdue</span></td></tr>
@@ -870,7 +871,7 @@ function saveSale(){
   const status=document.getElementById('s-pay').value;
   const gp=amt-cost,pct=amt?(gp/amt*100):0;
   const statusPill=status==='Paid'?'p-green':status==='Pending'?'p-amber':'p-blue';
-  const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+  const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
   const c=chColors[ch]||['139,148,158','var(--text2)'];
   prependRow('tb-sales','<tr><td style="color:var(--text2);font-size:.7rem">'+todayStr()+'</td><td><span class="badge" style="background:rgba('+c[0]+',.12);color:'+c[1]+'">'+ch+'</span></td><td class="mono">'+model+'</td><td class="rtl">'+prod+'</td><td>'+brand+'</td><td class="mono">'+qty+'</td><td class="amt">'+fmt(amt)+'</td><td class="amt">'+fmt(cost)+'</td><td class="amt" style="color:'+(gp>=0?'var(--green)':'var(--red)')+'">'+fmt(gp)+'</td><td class="mono" style="color:'+(gp>=0?'var(--green)':'var(--red)')+'">'+pct.toFixed(1)+'%</td><td><span class="pill '+statusPill+'">'+status+'</span></td></tr>');
   resetForm(['s-mod','s-prod','s-brand','s-ord','s-qty','s-amt','s-cost','s-gp']);
@@ -907,7 +908,7 @@ function saveAR(){
   const net=inv*(1-comm/100);
   const status=document.getElementById('ar-status').value;
   const statusPill=status==='Received'?'p-green':status==='Pending'?'p-amber':'p-blue';
-  const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+  const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
   const c=chColors[ch]||['139,148,158','var(--text2)'];
   prependRow('tb-ar','<tr><td style="color:var(--text2);font-size:.7rem">'+todayStr()+'</td><td><span class="badge" style="background:rgba('+c[0]+',.12);color:'+c[1]+'">'+ch+'</span></td><td>'+type+'</td><td class="mono">'+ref+'</td><td class="amt">'+fmt(inv)+'</td><td class="mono">'+comm.toFixed(1)+'%</td><td class="amt" style="color:var(--blue)">'+fmt(net)+'</td><td style="color:var(--text2);font-size:.7rem">—</td><td><span class="pill '+statusPill+'">'+status+'</span></td></tr>');
   resetForm(['ar-ref','ar-inv','ar-comm','ar-net']);
@@ -1063,7 +1064,7 @@ function importInventory(wb){
     let pill='p-green', label='✅ In', availColor='var(--green)';
     if(available===0){pill='p-red';label='❌ Out';availColor='var(--text2)';}
     else if(available<0){pill='p-red';label='❌ Neg';availColor='var(--red)';}
-    else if(available<=3){pill='p-amber';label='⚠ Low';availColor='var(--accent)';}
+    else if(available<=3){pill='p-amber';label='⚠ Low';availColor='var(--amber)';}
     return `<tr><td class="mono">${model}</td><td class="rtl">${product}</td><td>${brand}</td><td class="amt">${fmt(avgCost)}</td><td class="mono">${rcvd}</td><td class="mono">${sold}</td><td class="mono" style="color:${availColor}">${available}</td><td class="amt" style="color:${stockValue<0?'var(--red)':''}">${fmt(stockValue)}</td><td><span class="pill ${pill}">${label}</span></td><td style="color:var(--text2);font-size:.7rem">${lastSale?todayStrFromDate(lastSale):'—'}</td></tr>`;
   }).join('');
   if(html) document.getElementById('tb-inv').innerHTML = html;
@@ -1103,7 +1104,7 @@ const IMPORT_MAPS = {
       const status = pick(r,['Payment Status','Status']) || 'Paid';
       const gp = amt-cost, pct = amt?(gp/amt*100):0;
       const statusPill = status==='Paid'?'p-green':status==='Pending'?'p-amber':'p-blue';
-      const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+      const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
       const c = chColors[ch] || ['139,148,158','var(--text2)'];
       return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td class="mono">${model}</td><td class="rtl">${prod}</td><td>${brand}</td><td class="mono">${qty}</td><td class="amt">${fmt(amt)}</td><td class="amt">${fmt(cost)}</td><td class="amt" style="color:${gp>=0?'var(--green)':'var(--red)'}">${fmt(gp)}</td><td class="mono" style="color:${gp>=0?'var(--green)':'var(--red)'}">${pct.toFixed(1)}%</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
     }
@@ -1120,7 +1121,7 @@ const IMPORT_MAPS = {
       const net = inv*(1-comm/100);
       const status = pick(r,['Payment Status','Status']) || 'Pending';
       const statusPill = status==='Received'?'p-green':status==='Pending'?'p-amber':'p-blue';
-      const chColors={'Jumia':['232,160,32','var(--accent)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
+      const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
       const c = chColors[ch] || ['139,148,158','var(--text2)'];
       return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td>${type}</td><td class="mono">${ref}</td><td class="amt">${fmt(inv)}</td><td class="mono">${comm.toFixed(1)}%</td><td class="amt" style="color:var(--blue)">${fmt(net)}</td><td style="color:var(--text2);font-size:.7rem">—</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
     }
