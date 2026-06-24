@@ -694,7 +694,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="saveCash()">✓ Save Cash Entry</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Cash Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search description, category…"/><button class="btn-import" onclick="triggerImport('cash')">📤 Import Excel</button><span class="tbl-sub" id="cash-sub"></span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Cash Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search description, category…"/><select class="fsel" id="cash-filter-category"><option>All Categories</option></select><select class="fsel" id="cash-filter-date"><option>All Dates</option></select><button class="btn-import" onclick="triggerImport('cash')">📤 Import Excel</button><span class="tbl-sub" id="cash-sub"></span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Voucher</th><th>Date</th><th>Description</th><th>Category</th><th>Receipts (EGP)</th><th>Payments (EGP)</th><th>Running Balance</th><th>Action</th></tr></thead>
       <tbody id="tb-cash"></tbody>
@@ -1357,6 +1357,21 @@ function renderCashAll(){
 
   const sub = document.getElementById('cash-sub');
   if(sub) sub.textContent = CASH_TRANSACTIONS.length+' vouchers · EGP '+fmt(agg.balance)+' on hand';
+
+  const catSel = document.getElementById('cash-filter-category');
+  const catPrev = catSel.value;
+  const cats = [...new Set(CASH_TRANSACTIONS.map(t=>t.category))].sort();
+  catSel.innerHTML = '<option>All Categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  if(cats.includes(catPrev)) catSel.value = catPrev;
+
+  const dateSel = document.getElementById('cash-filter-date');
+  const datePrev = dateSel.value;
+  const dates = [...new Set(CASH_TRANSACTIONS.map(t=>fmtDateISO(t.date)))].sort((a,b)=>{
+    const [da,ma,ya]=a.split('/'), [db,mb,yb]=b.split('/');
+    return new Date(`${yb}-${mb}-${db}`) - new Date(`${ya}-${ma}-${da}`);
+  });
+  dateSel.innerHTML = '<option>All Dates</option>' + dates.map(d=>`<option value="${d}">${d}</option>`).join('');
+  if(dates.includes(datePrev)) dateSel.value = datePrev;
 }
 
 function saveCash(){
