@@ -460,10 +460,9 @@ body.locked>*:not(#authGate){display:none}
   </div>
   <div class="ap-subview active" id="ap-view-summary">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">💳</div><div class="kpi-label">Total AP Outstanding</div><div class="kpi-value" style="color:var(--red)" id="ap-kpi-outstanding">843K</div><div class="kpi-sub" id="ap-kpi-outstanding-sub">EGP · 30 vendors</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Paid (Jun)</div><div class="kpi-value" style="color:var(--green)" id="ap-kpi-paid">393K</div><div class="kpi-sub">EGP · this month</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">🧾</div><div class="kpi-label">New Bills (Jun)</div><div class="kpi-value" id="ap-kpi-newbills">411K</div><div class="kpi-sub" id="ap-kpi-newbills-sub">EGP · 29 invoices</div></div>
-    <div class="kpi-card" style="--card-accent:var(--purple)"><div class="kpi-icon">⏰</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--purple)" id="ap-kpi-overdue">6</div><div class="kpi-sub" id="ap-kpi-overdue-sub">vendors · EGP 13.4K</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Bills (EGP)</div><div class="kpi-value" style="color:var(--red)" id="ap-kpi-totalbills">1,298,120</div><div class="kpi-sub" id="ap-kpi-totalbills-sub">30 vendors</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Total Payments (EGP)</div><div class="kpi-value" style="color:var(--green)" id="ap-kpi-totalpayments">454,645</div><div class="kpi-sub">incl. returns / credit notes</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">💳</div><div class="kpi-label">Net Balance (EGP)</div><div class="kpi-value" style="color:var(--red)" id="ap-kpi-netbalance">843,475</div><div class="kpi-sub" id="ap-kpi-netbalance-sub">outstanding to vendors</div></div>
   </div>
   <div class="aging-grid">
     <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)" id="ap-age-current">EGP 838.1K</div><div class="aging-track"><div class="aging-fill" id="ap-age-current-bar" style="width:99%;background:var(--green)"></div></div></div>
@@ -1027,13 +1026,13 @@ function importAP(wb){
   }).join('');
   document.getElementById('tb-ap').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="7" style="text-align:center;color:var(--text2);padding:22px">No records found in sheet</td></tr>';
 
-  document.getElementById('ap-kpi-outstanding').textContent = fmtK(totalOutstanding);
-  document.getElementById('ap-kpi-outstanding-sub').textContent = 'EGP · '+list.length+' vendors';
-  document.getElementById('ap-kpi-paid').textContent = fmtK(junePayments);
-  document.getElementById('ap-kpi-newbills').textContent = fmtK(juneBills);
-  document.getElementById('ap-kpi-newbills-sub').textContent = 'EGP · '+juneBillCount+' invoices';
-  document.getElementById('ap-kpi-overdue').textContent = overdue30.length;
-  document.getElementById('ap-kpi-overdue-sub').textContent = 'vendors · EGP '+fmtK(overdue30.reduce((s,x)=>s+x.balance,0));
+  const totalBills = list.reduce((s,x)=>s+x.bills,0) + list.reduce((s,x)=>s+(x.opening>0?x.opening:0),0);
+  const totalPayments = list.reduce((s,x)=>s+x.payments,0) + list.reduce((s,x)=>s+(x.opening<0?-x.opening:0),0);
+  document.getElementById('ap-kpi-totalbills').textContent = fmt(totalBills,0);
+  document.getElementById('ap-kpi-totalbills-sub').textContent = list.length+' vendors';
+  document.getElementById('ap-kpi-totalpayments').textContent = fmt(totalPayments,0);
+  document.getElementById('ap-kpi-netbalance').textContent = fmt(totalOutstanding,0);
+  document.getElementById('ap-kpi-netbalance').style.color = totalOutstanding>0?'var(--red)':'var(--green)';
   document.getElementById('ap-age-current').textContent = 'EGP '+fmtK(buckets.c);
   document.getElementById('ap-age-current-bar').style.width = Math.max(4,buckets.c/maxBucket*100)+'%';
   document.getElementById('ap-age-due').textContent = 'EGP '+fmtK(buckets.d);
