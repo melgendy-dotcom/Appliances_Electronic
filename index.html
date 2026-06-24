@@ -265,6 +265,7 @@ body.locked>*:not(#authGate){display:none}
   <button class="mod-tab" data-mod="ap"         onclick="switchMod('ap')">💳 AP Ledger</button>
   <button class="mod-tab" data-mod="ar"         onclick="switchMod('ar')">📥 AR Ledger</button>
   <button class="mod-tab" data-mod="expenses"   onclick="switchMod('expenses')">💸 Expenses</button>
+  <button class="mod-tab" data-mod="cash"       onclick="switchMod('cash')">💰 Cash on Hand</button>
 </nav>
 
 <!-- ══ PURCHASING ══ -->
@@ -660,6 +661,48 @@ body.locked>*:not(#authGate){display:none}
 </div>
 </div>
 
+<!-- ══ CASH ON HAND ══ -->
+<div class="mod-panel" id="mod-cash">
+<div class="mod-wrap">
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🏦</div><div class="kpi-label">Beginning Balance</div><div class="kpi-value" style="color:var(--blue)" id="cash-kpi-opening">0</div><div class="kpi-sub" id="cash-kpi-opening-sub">EGP · as of —</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">⬇️</div><div class="kpi-label">Total Receipts (IN)</div><div class="kpi-value" style="color:var(--green)" id="cash-kpi-receipts">0</div><div class="kpi-sub">EGP</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">⬆️</div><div class="kpi-label">Total Payments (OUT)</div><div class="kpi-value" style="color:var(--red)" id="cash-kpi-payments">0</div><div class="kpi-sub">EGP</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">💰</div><div class="kpi-label">Current Cash Balance</div><div class="kpi-value" id="cash-kpi-balance">0</div><div class="kpi-sub">EGP on hand</div></div>
+  </div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-title">Cash Outflow by Category</div>
+      <div class="progress-list" id="cash-category-chart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Category Mapping Reference</div>
+      <div id="cash-mapping-ref" style="font-size:.72rem;color:var(--text2);max-height:170px;overflow-y:auto"></div>
+    </div>
+  </div>
+  <div class="form-panel">
+    <div class="form-title">➕ Log Cash Transaction</div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="cash-date"/></div>
+      <div class="fg"><label class="fl">Voucher #</label><input class="fi" type="number" id="cash-voucher" placeholder="auto"/></div>
+      <div class="fg" style="grid-column:span 2"><label class="fl">Description</label><input class="fi" type="text" id="cash-desc" placeholder="Brief description / وصف العملية" dir="auto"/></div>
+      <div class="fg"><label class="fl">Category</label><select class="fs" id="cash-category" onchange="updateCashCategoryHint()"></select></div>
+      <div class="fg"><label class="fl">Receipts / IN (EGP)</label><input class="fi" type="number" id="cash-receipt" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Payments / OUT (EGP)</label><input class="fi" type="number" id="cash-payment" placeholder="0.00"/></div>
+    </div>
+    <div id="cash-category-hint" style="font-size:.72rem;color:var(--text2);margin-bottom:10px;direction:rtl;text-align:left"></div>
+    <button class="btn-save" onclick="saveCash()">✓ Save Cash Entry</button>
+  </div>
+  <div class="tbl-card">
+    <div class="tbl-toolbar"><div class="tbl-title">Cash Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search description, category…"/><button class="btn-import" onclick="triggerImport('cash')">📤 Import Excel</button><span class="tbl-sub" id="cash-sub"></span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Voucher</th><th>Date</th><th>Description</th><th>Category</th><th>Receipts (EGP)</th><th>Payments (EGP)</th><th>Running Balance</th><th>Action</th></tr></thead>
+      <tbody id="tb-cash"></tbody>
+    </table></div>
+  </div>
+</div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span></div>
@@ -697,8 +740,9 @@ function checkAuth(e){
 
 document.addEventListener('DOMContentLoaded',()=>{
   const today=new Date().toISOString().split('T')[0];
-  ['po-date','s-date','ap-date','ar-date','exp-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
+  ['po-date','s-date','ap-date','ar-date','exp-date','cash-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
   renderApAll();
+  renderCashAll();
 });
 
 // ---------- AP source data (from AP_Ledger_Formulas.xlsx — Transaction Log) ----------
@@ -1040,6 +1084,7 @@ function handleImportFile(event){
       else if(target==='ar') importGeneric(wb,'ar');
       else if(target==='exp') importGeneric(wb,'exp');
       else if(target==='inv') importInventory(wb);
+      else if(target==='cash') importCash(wb);
     }catch(err){
       toast('Import failed: '+err.message,'err');
     }
@@ -1213,6 +1258,173 @@ function saveExpense(){
   resetForm(['exp-desc','exp-amt','exp-note']);
   document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
   toast('Expense saved','ok');
+}
+
+// ---------- Cash on Hand ----------
+const CASH_CATEGORIES = {
+  'Car Rent': 'ايجار سياره لنقل منتجات',
+  'Electricity Cost': 'فاتورة الكهرباء',
+  'Insurance': 'تأمين',
+  'Legal Payments': 'مدفوعات متعلقة بتقديم أوراق الي اي جهه مثل ضرائب / محامي',
+  'Packing Material': 'سوليبتاب / كرتون (اي مصروفات هتم علي البضاعه)',
+  'Penalty': 'دفع مصاريف نتيجة تأخر الشحن او عدم توافر المنتج',
+  'Rent': 'ايجار',
+  'Salaries': 'مرتبات',
+  'Supplies': 'شراء أدوات مكتبيه (ورق / أقلام ...)',
+  'Tips': 'اكراميات',
+  'Transportation': 'انتقالات',
+  'Other': 'أخرى / غير ذلك',
+};
+
+let CASH_OPENING_BALANCE = 17235;
+let CASH_OPENING_DATE = '2026-06-21';
+const CASH_TRANSACTIONS = [
+  {voucher:1, date:'2026-06-21', desc:'اكراميه عامل الشهد+ عامل الهدير', category:'Tips', receipt:0, payment:50},
+  {voucher:2, date:'2026-06-21', desc:'شراء استرتش', category:'Packing Material', receipt:0, payment:10600},
+  {voucher:3, date:'2026-06-21', desc:'شراء لزق', category:'Packing Material', receipt:0, payment:600},
+  {voucher:4, date:'2026-06-21', desc:'شراء ببلز', category:'Packing Material', receipt:0, payment:120},
+  {voucher:5, date:'2026-06-21', desc:'شحن كرت الكهرباء', category:'Electricity Cost', receipt:0, payment:215},
+  {voucher:6, date:'2026-06-21', desc:'تحويل ثمن بضاعه كاش الي الرضا', category:'Other', receipt:0, payment:2200},
+  {voucher:7, date:'2026-06-22', desc:'ثمن شراء مروحه سقف برفكس صاروخ CFS-54 من مندوب رايه', category:'Other', receipt:0, payment:1450},
+  {voucher:8, date:'2026-06-22', desc:'مواصلات', category:'Transportation', receipt:0, payment:100},
+];
+CASH_TRANSACTIONS.forEach((t,i)=>t._id=i);
+let _cashNextId = CASH_TRANSACTIONS.length;
+
+function populateCashCategorySelect(){
+  const sel = document.getElementById('cash-category');
+  sel.innerHTML = Object.keys(CASH_CATEGORIES).map(c=>`<option value="${c}">${c}</option>`).join('');
+  updateCashCategoryHint();
+  document.getElementById('cash-mapping-ref').innerHTML = Object.entries(CASH_CATEGORIES).map(([en,ar])=>
+    `<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600;color:var(--text)">${en}</span><span dir="rtl">${ar}</span></div>`
+  ).join('');
+}
+function updateCashCategoryHint(){
+  const cat = document.getElementById('cash-category').value;
+  document.getElementById('cash-category-hint').textContent = CASH_CATEGORIES[cat] || '';
+}
+
+function aggregateCash(transactions){
+  const sorted = [...transactions].sort((a,b)=> (new Date(a.date)-new Date(b.date)) || (a.voucher-b.voucher));
+  let running = CASH_OPENING_BALANCE;
+  const withRunning = sorted.map(t=>{
+    running += (Number(t.receipt)||0) - (Number(t.payment)||0);
+    return {...t, running};
+  });
+  const totalReceipts = transactions.reduce((s,t)=>s+(Number(t.receipt)||0),0);
+  const totalPayments = transactions.reduce((s,t)=>s+(Number(t.payment)||0),0);
+  const balance = CASH_OPENING_BALANCE + totalReceipts - totalPayments;
+  const byCategory = {};
+  transactions.forEach(t=>{
+    const amt = Number(t.payment)||0;
+    if(!amt) return;
+    byCategory[t.category] = (byCategory[t.category]||0) + amt;
+  });
+  return {withRunning, totalReceipts, totalPayments, balance, byCategory};
+}
+
+function deleteCashTransaction(id){
+  const idx = CASH_TRANSACTIONS.findIndex(t=>t._id===id);
+  if(idx===-1) return;
+  const t = CASH_TRANSACTIONS[idx];
+  if(!confirm('Delete this cash entry?\nVoucher #'+t.voucher+' · '+t.desc+'\nReceipt: EGP '+fmt(t.receipt)+' / Payment: EGP '+fmt(t.payment))) return;
+  CASH_TRANSACTIONS.splice(idx,1);
+  renderCashAll();
+  toast('Cash entry deleted','ok');
+}
+
+function renderCashAll(){
+  if(!document.getElementById('cash-category').options.length) populateCashCategorySelect();
+  const agg = aggregateCash(CASH_TRANSACTIONS);
+  const rowsHtml = agg.withRunning.slice().reverse().map(t=>{
+    const rtl = isArabic(t.desc) ? 'direction:rtl' : '';
+    return `<tr><td class="mono">${t.voucher}</td><td style="color:var(--text2);font-size:.7rem">${fmtDateISO(t.date)}</td><td style="${rtl}">${t.desc}</td><td><span class="pill p-blue">${t.category}</span></td><td class="amt" style="color:${t.receipt?'var(--green)':'var(--text3)'}">${t.receipt?fmt(t.receipt):'–'}</td><td class="amt" style="color:${t.payment?'var(--red)':'var(--text3)'}">${t.payment?fmt(t.payment):'–'}</td><td class="amt">${fmt(t.running)}</td><td><button class="btn-del" onclick="deleteCashTransaction(${t._id})" title="Delete entry">🗑</button></td></tr>`;
+  }).join('');
+  document.getElementById('tb-cash').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="8" style="text-align:center;color:var(--text2);padding:22px">No cash transactions yet</td></tr>';
+
+  document.getElementById('cash-kpi-opening').textContent = fmt(CASH_OPENING_BALANCE);
+  document.getElementById('cash-kpi-opening-sub').textContent = 'EGP · as of '+fmtDateISO(CASH_OPENING_DATE);
+  document.getElementById('cash-kpi-receipts').textContent = fmt(agg.totalReceipts);
+  document.getElementById('cash-kpi-payments').textContent = fmt(agg.totalPayments);
+  document.getElementById('cash-kpi-balance').textContent = fmt(agg.balance);
+  document.getElementById('cash-kpi-balance').style.color = agg.balance>=0?'var(--accent)':'var(--red)';
+
+  const catEntries = Object.entries(agg.byCategory).sort((a,b)=>b[1]-a[1]);
+  const maxCat = Math.max(...catEntries.map(c=>c[1]),1);
+  document.getElementById('cash-category-chart').innerHTML = catEntries.length ? catEntries.map(([cat,amt])=>
+    `<div class="prog-row"><span class="prog-label">${cat}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,amt/maxCat*100)}%;background:var(--blue)"></div></div><span class="prog-val">${fmt(amt)}</span></div>`
+  ).join('') : '<div style="color:var(--text2);font-size:.78rem">No payments recorded yet</div>';
+
+  const sub = document.getElementById('cash-sub');
+  if(sub) sub.textContent = CASH_TRANSACTIONS.length+' vouchers · EGP '+fmt(agg.balance)+' on hand';
+}
+
+function saveCash(){
+  const desc = document.getElementById('cash-desc').value.trim();
+  const receipt = n(document.getElementById('cash-receipt').value);
+  const payment = n(document.getElementById('cash-payment').value);
+  if(!desc){toast('Description is required','err');return;}
+  if(!receipt && !payment){toast('Enter a receipt or payment amount','err');return;}
+  const date = document.getElementById('cash-date').value || new Date().toISOString().split('T')[0];
+  const category = document.getElementById('cash-category').value;
+  let voucher = Number(document.getElementById('cash-voucher').value);
+  if(!voucher) voucher = Math.max(0,...CASH_TRANSACTIONS.map(t=>t.voucher))+1;
+  CASH_TRANSACTIONS.push({voucher, date, desc, category, receipt, payment, _id:_cashNextId++});
+  renderCashAll();
+  resetForm(['cash-voucher','cash-desc','cash-receipt','cash-payment']);
+  document.getElementById('cash-date').value=new Date().toISOString().split('T')[0];
+  toast('Cash entry saved','ok');
+}
+
+function importCash(wb){
+  const sheet = findSheet(wb, ['cash']);
+  const rows = sheetRows(sheet).filter(r=>pick(r,['Date']) || pick(r,['Description']));
+  const parsed = [];
+  let openingSet = false;
+  rows.forEach(row=>{
+    const desc = pick(row,['Description']) || '';
+    const date = toJsDate(pick(row,['Date']));
+    const receipt = Number(pick(row,['Receipts (IN)','Receipts','IN'])) || 0;
+    const payment = Number(pick(row,['Payments (Out)','Payments (OUT)','Payments','OUT'])) || 0;
+    const running = Number(pick(row,['Running balance','Running Balance'])) || 0;
+    if(/beginning balance/i.test(desc)){
+      CASH_OPENING_BALANCE = running || receipt || 0;
+      CASH_OPENING_DATE = date ? date.toISOString().split('T')[0] : CASH_OPENING_DATE;
+      openingSet = true;
+      return;
+    }
+    if(!desc) return;
+    parsed.push({
+      voucher: Number(pick(row,['Voucher number','Voucher'])) || (parsed.length+1),
+      date: date ? date.toISOString().split('T')[0] : '',
+      desc,
+      category: guessCashCategory(desc),
+      receipt, payment,
+    });
+  });
+  if(!openingSet) toast('No "Beginning balance" row found — opening balance unchanged','err');
+  parsed.forEach((t,i)=>t._id=i);
+  _cashNextId = parsed.length;
+  CASH_TRANSACTIONS.length = 0;
+  CASH_TRANSACTIONS.push(...parsed);
+  renderCashAll();
+  toast('Imported '+parsed.length+' cash vouchers','ok');
+}
+
+function guessCashCategory(desc){
+  const d = desc.toLowerCase();
+  if(/اكرامي|كرامي|tip/.test(desc)) return 'Tips';
+  if(/استرتش|لزق|ببلز|كرتون|سوليبتاب|packing/i.test(desc)) return 'Packing Material';
+  if(/كهرباء|electricity/i.test(desc)) return 'Electricity Cost';
+  if(/مواصلات|transport/i.test(desc)) return 'Transportation';
+  if(/ايجار سياره|car rent/i.test(desc)) return 'Car Rent';
+  if(/ايجار|rent/i.test(desc)) return 'Rent';
+  if(/تأمين|insurance/i.test(desc)) return 'Insurance';
+  if(/ضرائب|محامي|legal/i.test(desc)) return 'Legal Payments';
+  if(/غرامه|تأخر الشحن|penalty/i.test(desc)) return 'Penalty';
+  if(/مرتب|salary|salaries/i.test(desc)) return 'Salaries';
+  if(/أدوات مكتبيه|supplies/i.test(desc)) return 'Supplies';
+  return 'Other';
 }
 </script>
 </body>
