@@ -696,8 +696,7 @@ function checkAuth(e){
 document.addEventListener('DOMContentLoaded',()=>{
   const today=new Date().toISOString().split('T')[0];
   ['po-date','s-date','ap-date','ar-date','exp-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
-  renderTxnLog();
-  initVendorLedger();
+  renderApAll();
 });
 
 // ---------- AP source data (from AP_Ledger_Formulas.xlsx — Transaction Log) ----------
@@ -721,11 +720,96 @@ function renderTxnLog(){
   document.getElementById('txnlog-sub').textContent = sorted.length+' transactions';
 }
 
-function initVendorLedger(){
+function refreshVendorDropdown(){
   const vendors = [...new Set(AP_TRANSACTIONS.map(t=>t.vendor))].sort((a,b)=>a.localeCompare(b));
   const sel = document.getElementById('ledger-vendor-select');
+  const prev = sel.value;
   sel.innerHTML = vendors.map(v=>`<option value="${v}">${v}</option>`).join('');
-  renderVendorLedger(vendors[0]);
+  const selected = vendors.includes(prev) ? prev : vendors[0];
+  sel.value = selected;
+  renderVendorLedger(selected);
+}
+
+// ---------- AP unified aggregation (single source of truth: AP_TRANSACTIONS) ----------
+function aggregateAP(transactions){
+  const vendors = {};
+  let juneBills=0, juneBillCount=0, junePayments=0;
+  const now = new Date();
+  transactions.forEach(t=>{
+    if(!t.vendor) return;
+    const date = new Date(t.date);
+    const type = t.type || '';
+    const bill = Number(t.bill)||0, pay = Number(t.payment)||0;
+    if(!vendors[t.vendor]) vendors[t.vendor]={opening:0,bills:0,payments:0,last:null};
+    const v = vendors[t.vendor];
+    if(type==='Opening Balance') v.opening += bill-pay;
+    else if(type==='Vendor Bill') v.bills += bill;
+    else if(type==='Payment') v.payments += pay;
+    else if(type==='Returns'||type==='Credit Note') v.payments += pay;
+    else { v.bills+=bill; v.payments+=pay; }
+    if(!isNaN(date) && (!v.last || date>v.last)) v.last=date;
+    if(!isNaN(date) && date.getFullYear()===now.getFullYear() && date.getMonth()===now.getMonth()){
+      if(type==='Vendor Bill'){ juneBills+=bill; juneBillCount++; }
+      if(type==='Payment') junePayments+=pay;
+    }
+  });
+  const list = Object.keys(vendors).map(name=>{
+    const v=vendors[name];
+    const balance = Math.round((v.opening+v.bills-v.payments)*100)/100;
+    const days = v.last ? Math.floor((now-v.last)/86400000) : 9999;
+    return {vendor:name, opening:v.opening, bills:v.bills, payments:v.payments, balance, days};
+  }).sort((a,b)=>b.balance-a.balance);
+
+  const totalOutstanding = list.reduce((s,x)=>s+x.balance,0);
+  const totalBills = list.reduce((s,x)=>s+x.bills,0) + list.reduce((s,x)=>s+(x.opening>0?x.opening:0),0);
+  const totalPayments = list.reduce((s,x)=>s+x.payments,0) + list.reduce((s,x)=>s+(x.opening<0?-x.opening:0),0);
+  const payable = list.filter(x=>x.balance>0.01);
+  const buckets={c:0,d:0,o:0,cr:0};
+  payable.forEach(x=>{
+    if(x.days<=30) buckets.c+=x.balance;
+    else if(x.days<=60) buckets.d+=x.balance;
+    else if(x.days<=90) buckets.o+=x.balance;
+    else buckets.cr+=x.balance;
+  });
+  const maxBucket = Math.max(buckets.c,buckets.d,buckets.o,buckets.cr,1);
+  return {list, totalOutstanding, totalBills, totalPayments, buckets, maxBucket, juneBills, juneBillCount, junePayments};
+}
+
+function bucketInfo(days){
+  if(days<=30) return ['0-30d','p-green','Current'];
+  if(days<=60) return ['31-60d','p-amber','Due'];
+  if(days<=90) return ['61-90d','p-red','Overdue'];
+  return ['>90d','p-red','Critical'];
+}
+
+function renderApAll(){
+  const agg = aggregateAP(AP_TRANSACTIONS);
+  const rowsHtml = agg.list.map(x=>{
+    const [ageLabel,agePill,status]=bucketInfo(x.days);
+    const balColor = x.balance>0?'var(--red)':'var(--green)';
+    const rtl = isArabic(x.vendor) ? 'direction:rtl' : '';
+    return `<tr><td style="font-weight:600;${rtl}">${x.vendor}</td><td class="amt">${fmt(x.opening)}</td><td class="amt">${fmt(x.bills)}</td><td class="amt" style="color:var(--green)">${fmt(x.payments)}</td><td class="amt" style="color:${balColor}">${fmt(x.balance)}</td><td><span class="pill ${agePill}">${ageLabel}</span></td><td><span class="pill ${agePill}">${status}</span></td></tr>`;
+  }).join('');
+  document.getElementById('tb-ap').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="7" style="text-align:center;color:var(--text2);padding:22px">No records found</td></tr>';
+
+  document.getElementById('ap-kpi-totalbills').textContent = fmt(agg.totalBills);
+  document.getElementById('ap-kpi-totalbills-sub').textContent = agg.list.length+' vendors';
+  document.getElementById('ap-kpi-totalpayments').textContent = fmt(agg.totalPayments);
+  document.getElementById('ap-kpi-netbalance').textContent = fmt(agg.totalOutstanding);
+  document.getElementById('ap-kpi-netbalance').style.color = agg.totalOutstanding>0?'var(--red)':'var(--green)';
+  document.getElementById('ap-age-current').textContent = 'EGP '+fmtK(agg.buckets.c);
+  document.getElementById('ap-age-current-bar').style.width = Math.max(agg.buckets.c?4:0,agg.buckets.c/agg.maxBucket*100)+'%';
+  document.getElementById('ap-age-due').textContent = 'EGP '+fmtK(agg.buckets.d);
+  document.getElementById('ap-age-due-bar').style.width = Math.max(agg.buckets.d?4:0,agg.buckets.d/agg.maxBucket*100)+'%';
+  document.getElementById('ap-age-overdue').textContent = 'EGP '+fmtK(agg.buckets.o);
+  document.getElementById('ap-age-overdue-bar').style.width = Math.max(agg.buckets.o?4:0,agg.buckets.o/agg.maxBucket*100)+'%';
+  document.getElementById('ap-age-critical').textContent = 'EGP '+fmtK(agg.buckets.cr);
+  document.getElementById('ap-age-critical-bar').style.width = Math.max(agg.buckets.cr?4:0,agg.buckets.cr/agg.maxBucket*100)+'%';
+  const sub = document.getElementById('ap-sub');
+  if(sub) sub.textContent = agg.list.length+' vendors · EGP '+fmtK(agg.totalOutstanding)+' outstanding';
+
+  renderTxnLog();
+  refreshVendorDropdown();
 }
 
 function renderVendorLedger(vendor){
@@ -882,12 +966,16 @@ function saveSale(){
 function saveAP(){
   const vendor=document.getElementById('ap-vendor').value.trim();
   if(!vendor){toast('Vendor name is required','err');return;}
+  const date=document.getElementById('ap-date').value || new Date().toISOString().split('T')[0];
+  const type=document.getElementById('ap-type').value;
+  const ref=document.getElementById('ap-ref').value.trim();
   const bill=n(document.getElementById('ap-bill').value),pay=n(document.getElementById('ap-pay').value);
-  const bal=bill-pay;
-  prependRow('tb-ap','<tr><td style="font-weight:600;direction:rtl">'+vendor+'</td><td class="amt">0.00</td><td class="amt">'+fmt(bill)+'</td><td class="amt" style="color:var(--green)">'+fmt(pay)+'</td><td class="amt" style="color:'+(bal>0?'var(--red)':'var(--green)')+'">'+fmt(bal)+'</td><td><span class="pill p-green">0–30d</span></td><td><span class="pill p-green">Current</span></td></tr>');
+  const notes=document.getElementById('ap-notes').value.trim();
+  AP_TRANSACTIONS.push({date, vendor, type, ref, bill, payment:pay, notes});
+  renderApAll();
   resetForm(['ap-vendor','ap-ref','ap-bill','ap-pay','ap-notes']);
   document.getElementById('ap-date').value=new Date().toISOString().split('T')[0];
-  toast('AP transaction saved','ok');
+  toast('AP transaction saved — reflected in Summary, Log & Ledger','ok');
 }
 
 // ---------- AR ----------
@@ -970,81 +1058,26 @@ function fmtK(v){
 function importAP(wb){
   const sheet = findSheet(wb, ['transaction','log']);
   const rows = sheetRows(sheet);
-  const vendors = {};
-  let juneBills=0, juneBillCount=0, junePayments=0;
-  const now = new Date();
+  const parsed = [];
   rows.forEach(row=>{
     const vendor = pick(row,['Vendor Name','Vendor']);
     if(!vendor) return;
     const date = toJsDate(pick(row,['Date']));
-    const type = pick(row,['Transaction Type','Type']) || '';
-    const bill = Number(pick(row,['Bill Amount (EGP)','Bill Amount','Bill'])) || 0;
-    const pay = Number(pick(row,['Payment Amount (EGP)','Payment Amount','Payment'])) || 0;
-    if(!vendors[vendor]) vendors[vendor]={opening:0,bills:0,payments:0,last:null};
-    const v=vendors[vendor];
-    if(type==='Opening Balance') v.opening += bill-pay;
-    else if(type==='Vendor Bill') v.bills += bill;
-    else if(type==='Payment') v.payments += pay;
-    else if(type==='Returns'||type==='Credit Note') v.payments += pay;
-    else { v.bills+=bill; v.payments+=pay; }
-    if(date && (!v.last || date>v.last)) v.last=date;
-    if(date && date.getFullYear()===now.getFullYear() && date.getMonth()===now.getMonth()){
-      if(type==='Vendor Bill'){ juneBills+=bill; juneBillCount++; }
-      if(type==='Payment') junePayments+=pay;
-    }
+    parsed.push({
+      date: date ? date.toISOString().split('T')[0] : '',
+      vendor,
+      type: pick(row,['Transaction Type','Type']) || '',
+      ref: pick(row,['Reference / Invoice #','Reference','Ref']) || '',
+      bill: Number(pick(row,['Bill Amount (EGP)','Bill Amount','Bill'])) || 0,
+      payment: Number(pick(row,['Payment Amount (EGP)','Payment Amount','Payment'])) || 0,
+      notes: pick(row,['Notes']) || '',
+    });
   });
-  const list = Object.keys(vendors).map(name=>{
-    const v=vendors[name];
-    const balance = Math.round((v.opening+v.bills-v.payments)*100)/100;
-    const days = v.last ? Math.floor((now-v.last)/86400000) : 9999;
-    return {vendor:name, opening:v.opening, bills:v.bills, payments:v.payments, balance, days};
-  }).sort((a,b)=>b.balance-a.balance);
-
-  const totalOutstanding = list.reduce((s,x)=>s+x.balance,0);
-  const payable = list.filter(x=>x.balance>0.01);
-  const overdue30 = payable.filter(x=>x.days>30);
-  const buckets={c:0,d:0,o:0,cr:0};
-  payable.forEach(x=>{
-    if(x.days<=30) buckets.c+=x.balance;
-    else if(x.days<=60) buckets.d+=x.balance;
-    else if(x.days<=90) buckets.o+=x.balance;
-    else buckets.cr+=x.balance;
-  });
-  const maxBucket = Math.max(buckets.c,buckets.d,buckets.o,buckets.cr,1);
-
-  function bucketInfo(days){
-    if(days<=30) return ['0-30d','p-green','Current'];
-    if(days<=60) return ['31-60d','p-amber','Due'];
-    if(days<=90) return ['61-90d','p-red','Overdue'];
-    return ['>90d','p-red','Critical'];
-  }
-  const rowsHtml = list.map(x=>{
-    const [ageLabel,agePill,status]=bucketInfo(x.days);
-    const balColor = x.balance>0?'var(--red)':'var(--green)';
-    const rtl = /[؀-ۿ]/.test(x.vendor) ? 'direction:rtl' : '';
-    return `<tr><td style="font-weight:600;${rtl}">${x.vendor}</td><td class="amt">${fmt(x.opening)}</td><td class="amt">${fmt(x.bills)}</td><td class="amt" style="color:var(--green)">${fmt(x.payments)}</td><td class="amt" style="color:${balColor}">${fmt(x.balance)}</td><td><span class="pill ${agePill}">${ageLabel}</span></td><td><span class="pill ${agePill}">${status}</span></td></tr>`;
-  }).join('');
-  document.getElementById('tb-ap').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="7" style="text-align:center;color:var(--text2);padding:22px">No records found in sheet</td></tr>';
-
-  const totalBills = list.reduce((s,x)=>s+x.bills,0) + list.reduce((s,x)=>s+(x.opening>0?x.opening:0),0);
-  const totalPayments = list.reduce((s,x)=>s+x.payments,0) + list.reduce((s,x)=>s+(x.opening<0?-x.opening:0),0);
-  document.getElementById('ap-kpi-totalbills').textContent = fmt(totalBills,0);
-  document.getElementById('ap-kpi-totalbills-sub').textContent = list.length+' vendors';
-  document.getElementById('ap-kpi-totalpayments').textContent = fmt(totalPayments,0);
-  document.getElementById('ap-kpi-netbalance').textContent = fmt(totalOutstanding,0);
-  document.getElementById('ap-kpi-netbalance').style.color = totalOutstanding>0?'var(--red)':'var(--green)';
-  document.getElementById('ap-age-current').textContent = 'EGP '+fmtK(buckets.c);
-  document.getElementById('ap-age-current-bar').style.width = Math.max(4,buckets.c/maxBucket*100)+'%';
-  document.getElementById('ap-age-due').textContent = 'EGP '+fmtK(buckets.d);
-  document.getElementById('ap-age-due-bar').style.width = Math.max(buckets.d?4:0,buckets.d/maxBucket*100)+'%';
-  document.getElementById('ap-age-overdue').textContent = 'EGP '+fmtK(buckets.o);
-  document.getElementById('ap-age-overdue-bar').style.width = Math.max(buckets.o?4:0,buckets.o/maxBucket*100)+'%';
-  document.getElementById('ap-age-critical').textContent = 'EGP '+fmtK(buckets.cr);
-  document.getElementById('ap-age-critical-bar').style.width = Math.max(buckets.cr?4:0,buckets.cr/maxBucket*100)+'%';
-  const sub = document.getElementById('ap-sub');
-  if(sub) sub.textContent = list.length+' vendors · EGP '+fmtK(totalOutstanding)+' outstanding';
-
-  toast('Imported '+rows.length+' transactions · '+list.length+' vendors','ok');
+  AP_TRANSACTIONS.length = 0;
+  AP_TRANSACTIONS.push(...parsed);
+  renderApAll();
+  const vendorCount = new Set(parsed.map(t=>t.vendor)).size;
+  toast('Imported '+parsed.length+' transactions · '+vendorCount+' vendors','ok');
 }
 
 function importInventory(wb){
