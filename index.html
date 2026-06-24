@@ -231,6 +231,7 @@ body.locked>*:not(#authGate){display:none}
     <a class="nav-link" href="#" onclick="switchMod('ar');return false">AR</a>
     <a class="nav-link" href="#" onclick="switchMod('expenses');return false">Expenses</a>
   </nav>
+  <span id="sync-status" style="display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text2);margin-right:10px"><span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3)"></span><span id="sync-label">Not synced</span></span>
   <button class="hcta" onclick="switchMod('sales')">Open Dashboard</button>
 </header>
 
@@ -1441,6 +1442,135 @@ function guessCashCategory(desc){
   if(/أدوات مكتبيه|supplies/i.test(desc)) return 'Supplies';
   return 'Other';
 }
+
+// ---------- Live Google Sheets sync ----------
+const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyzGrC_WG9moCeChIjZD68gPlFBIe0zHXtqUZk2_mT4JHZk4Bcp32aI75pPzTl-qXhhDQ/exec';
+const SHEETS_REFRESH_MS = 45000;
+
+function fetchSheetJSONP(sheetName, onSuccess, onError){
+  const cbName = '_gs_cb_'+Math.random().toString(36).slice(2);
+  const timeout = setTimeout(()=>{ if(window[cbName]){ delete window[cbName]; script.remove(); onError && onError(new Error('timeout')); } }, 15000);
+  window[cbName] = function(data){
+    clearTimeout(timeout);
+    delete window[cbName];
+    script.remove();
+    onSuccess(data);
+  };
+  const script = document.createElement('script');
+  script.src = SHEETS_API_URL + '?sheet=' + encodeURIComponent(sheetName) + '&callback=' + cbName + '&_=' + Date.now();
+  script.onerror = function(){ clearTimeout(timeout); delete window[cbName]; script.remove(); onError && onError(new Error('network error')); };
+  document.body.appendChild(script);
+}
+
+function normalizeCashCategory(raw){
+  if(!raw) return 'Other';
+  const r = String(raw).trim().toLowerCase();
+  if(!r) return 'Other';
+  const aliases = {
+    'material':'Packing Material','packing material':'Packing Material','packing':'Packing Material',
+    'electricity':'Electricity Cost','electricity cost':'Electricity Cost',
+    'tips':'Tips','tip':'Tips',
+    'transportation':'Transportation','transport':'Transportation',
+    'car rent':'Car Rent','rent':'Rent','insurance':'Insurance',
+    'legal payments':'Legal Payments','legal':'Legal Payments',
+    'penalty':'Penalty','salaries':'Salaries','salary':'Salaries',
+    'supplies':'Supplies','other':'Other',
+  };
+  if(aliases[r]) return aliases[r];
+  const exact = Object.keys(CASH_CATEGORIES).find(k=>k.toLowerCase()===r);
+  return exact || 'Other';
+}
+
+function toIsoDate(v){
+  if(!v) return '';
+  const d = new Date(v);
+  return isNaN(d) ? '' : d.toISOString().split('T')[0];
+}
+
+function loadApFromSheet(){
+  fetchSheetJSONP('Transaction Log', rows=>{
+    const parsed = rows.filter(r=>r['Vendor Name']).map(r=>({
+      date: toIsoDate(r['Date']),
+      vendor: r['Vendor Name'],
+      type: r['Transaction Type']||'',
+      ref: r['Reference / Invoice #']||'',
+      bill: Number(r['Bill Amount (EGP)'])||0,
+      payment: Number(r['Payment Amount (EGP)'])||0,
+      notes: r['Notes']||'',
+    }));
+    parsed.forEach((t,i)=>t._id=i);
+    _apNextId = parsed.length;
+    AP_TRANSACTIONS.length = 0;
+    AP_TRANSACTIONS.push(...parsed);
+    renderApAll();
+    markSynced();
+  }, markSyncFailed);
+}
+
+function loadCashFromSheet(){
+  fetchSheetJSONP('Cash on hand', rows=>{
+    const real = rows.filter(r=>r['Description'] && String(r['Description']).trim());
+    let opening=null, openingDate=null;
+    const parsed=[];
+    real.forEach(r=>{
+      const desc = String(r['Description']).trim();
+      const date = toIsoDate(r['Date']);
+      const receipt = Number(r['Receipts (IN)'])||0;
+      const payment = Number(r['Payments (Out)'])||0;
+      const running = Number(r['Running balance'])||0;
+      if(/beginning balance/i.test(desc)){
+        opening = running || receipt || 0;
+        openingDate = date;
+        return;
+      }
+      parsed.push({
+        voucher: Number(r['Voucher number'])||(parsed.length+1),
+        date, desc,
+        category: normalizeCashCategory(r['Mapping ']!==undefined ? r['Mapping '] : r['Mapping']),
+        receipt, payment,
+      });
+    });
+    if(opening!==null){ CASH_OPENING_BALANCE=opening; CASH_OPENING_DATE=openingDate||CASH_OPENING_DATE; }
+    parsed.forEach((t,i)=>t._id=i);
+    _cashNextId = parsed.length;
+    CASH_TRANSACTIONS.length = 0;
+    CASH_TRANSACTIONS.push(...parsed);
+    renderCashAll();
+    markSynced();
+  }, markSyncFailed);
+}
+
+let _syncPending = 0, _syncFailedCount = 0;
+function markSynced(){
+  _syncPending = Math.max(0,_syncPending-1);
+  if(_syncPending>0) return;
+  const dot = document.getElementById('sync-dot'), label = document.getElementById('sync-label');
+  if(_syncFailedCount>0){
+    dot.style.background = 'var(--red)';
+    label.textContent = 'Sync partial — retry in '+(SHEETS_REFRESH_MS/1000)+'s';
+  } else {
+    dot.style.background = 'var(--accent)';
+    label.textContent = 'Synced '+new Date().toLocaleTimeString();
+  }
+  _syncFailedCount = 0;
+}
+function markSyncFailed(){
+  _syncFailedCount++;
+  markSynced();
+}
+
+function syncAllSheets(){
+  _syncPending = 2;
+  const dot = document.getElementById('sync-dot'), label = document.getElementById('sync-label');
+  if(dot){ dot.style.background='var(--amber)'; label.textContent='Syncing…'; }
+  loadApFromSheet();
+  loadCashFromSheet();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  syncAllSheets();
+  setInterval(syncAllSheets, SHEETS_REFRESH_MS);
+});
 </script>
 </body>
 </html>
