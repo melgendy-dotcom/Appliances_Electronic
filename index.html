@@ -540,8 +540,9 @@ body.locked>*:not(#authGate){display:none}
   <div class="ap-subview" id="ap-view-ledger">
     <div class="form-panel">
       <div class="form-title">🔍 Individual Vendor Ledger — Detail View</div>
-      <div class="form-grid" style="grid-template-columns:280px">
+      <div class="form-grid" style="grid-template-columns:280px auto">
         <div class="fg"><label class="fl">Select Vendor</label><select class="fs" id="ledger-vendor-select" onchange="renderVendorLedger(this.value)"></select></div>
+        <div class="fg"><label class="fl">&nbsp;</label><button class="btn-import" onclick="exportVendorLedger()">📤 Export Statement</button></div>
       </div>
     </div>
     <div class="ledger-banner" id="ledger-owe-banner"></div>
@@ -887,6 +888,37 @@ function renderVendorLedger(vendor){
   if(running>0.01) banner.innerHTML = `⚠️ You owe <strong>${vendor}</strong> <span class="mono" style="color:var(--red)">EGP ${fmt(running)}</span>`;
   else if(running<-0.01) banner.innerHTML = `💰 <strong>${vendor}</strong> has overpaid — credit of <span class="mono" style="color:var(--green)">EGP ${fmt(Math.abs(running))}</span>`;
   else banner.innerHTML = `✅ <strong>${vendor}</strong> account is settled`;
+}
+
+function exportVendorLedger(){
+  const vendor = document.getElementById('ledger-vendor-select').value;
+  if(!vendor){ toast('Select a vendor first','err'); return; }
+  const txns = AP_TRANSACTIONS.filter(t=>t.vendor===vendor).sort((a,b)=> new Date(a.date)-new Date(b.date));
+  let running=0, totalBill=0, totalPay=0;
+  const aoa = [
+    ['Vendor Statement'],
+    ['Vendor:', vendor],
+    ['Generated:', new Date().toLocaleDateString('en-GB')+' '+new Date().toLocaleTimeString('en-GB')],
+    [],
+    ['Date','Type','Reference','Bill (EGP)','Payment (EGP)','Running Balance (EGP)','Notes'],
+  ];
+  txns.forEach(t=>{
+    running += (t.bill - t.payment);
+    totalBill += t.bill; totalPay += t.payment;
+    aoa.push([fmtDateISO(t.date), t.type, t.ref||'', t.bill||0, t.payment||0, running, t.notes||'']);
+  });
+  aoa.push([]);
+  aoa.push(['CLOSING BALANCE','','',totalBill,totalPay,running,'']);
+  aoa.push([]);
+  aoa.push([running>0.01 ? 'Amount Owed to Vendor:' : (running<-0.01 ? 'Credit / Overpaid:' : 'Status:'), Math.abs(running)|| 'Settled']);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:12},{wch:16},{wch:14},{wch:14},{wch:14},{wch:18},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Statement');
+  const safeName = vendor.replace(/[^\w؀-ۿ]+/g,'_');
+  XLSX.writeFile(wb, `Vendor_Statement_${safeName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  toast('Statement exported for '+vendor,'ok');
 }
 
 function switchMod(name){
