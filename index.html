@@ -324,6 +324,8 @@ body.locked>*:not(#authGate){display:none}
     <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⚠️</div><div class="kpi-label">Low Stock (≤3)</div><div class="kpi-value" style="color:var(--amber)" id="inv-kpi-low">0</div><div class="kpi-sub">Needs reorder</div></div>
     <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❌</div><div class="kpi-label">Out of Stock</div><div class="kpi-value" style="color:var(--red)" id="inv-kpi-out">0</div><div class="kpi-sub">Revenue at risk</div></div>
     <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">💰</div><div class="kpi-label">Stock Value (WAC)</div><div class="kpi-value" style="color:var(--blue)" id="inv-kpi-value">0</div><div class="kpi-sub">EGP · IAS 2 basis</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">📊</div><div class="kpi-label">Total Available Qty</div><div class="kpi-value" id="inv-kpi-available">0</div><div class="kpi-sub">units across all SKUs</div></div>
+    <div class="kpi-card" style="--card-accent:var(--purple)"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Sold Qty</div><div class="kpi-value" style="color:var(--purple)" id="inv-kpi-sold">0</div><div class="kpi-sub">units across all SKUs</div></div>
   </div>
   <div class="chart-grid">
     <div class="chart-card">
@@ -1130,6 +1132,8 @@ function renderInventoryAll(){
   document.getElementById('inv-kpi-low').textContent = low;
   document.getElementById('inv-kpi-out').textContent = out;
   document.getElementById('inv-kpi-value').textContent = fmt(stockValue);
+  document.getElementById('inv-kpi-available').textContent = list.reduce((s,x)=>s+x.available,0);
+  document.getElementById('inv-kpi-sold').textContent = list.reduce((s,x)=>s+x.sold,0);
 
   function statusInfo(avail){
     if(avail>3) return ['p-green','✅ In','var(--green)'];
