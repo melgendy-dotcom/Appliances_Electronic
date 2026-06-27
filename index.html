@@ -375,10 +375,10 @@ body.locked>*:not(#authGate){display:none}
     <div class="form-title">➕ Log New Sale</div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Sale Date</label><input class="fi" type="date" id="s-date"/></div>
-      <div class="fg"><label class="fl">Platform / Channel</label><input class="fi" type="text" id="s-ch" placeholder="e.g. Noon, Raya, Kenzz"/></div>
+      <div class="fg"><label class="fl">Platform / Channel</label><input class="fi" type="text" id="s-ch" placeholder="e.g. Noon, Raya, Kenzz" oninput="renderSalesJournalPreview()"/></div>
       <div class="fg"><label class="fl">Model No.</label><input class="fi" type="text" id="s-mod" placeholder="e.g. JB0123WH" oninput="autofillFromModel('s')"/></div>
       <div class="fg"><label class="fl">Product Name (AR)</label><input class="fi" type="text" id="s-prod" dir="rtl" placeholder="اسم المنتج" readonly style="color:var(--text2)"/></div>
-      <div class="fg"><label class="fl">Order No.</label><input class="fi" type="text" id="s-ord"/></div>
+      <div class="fg"><label class="fl">Order No.</label><input class="fi" type="text" id="s-ord" oninput="renderSalesJournalPreview()"/></div>
       <div class="fg"><label class="fl">Qty Sold</label><input class="fi" type="number" id="s-qty" value="1" oninput="calcGP()"/></div>
       <div class="fg"><label class="fl">Sale Amount / unit (EGP)</label><input class="fi" type="number" id="s-amt" placeholder="0.00" oninput="calcGP()"/></div>
       <div class="fg"><label class="fl">Cost / unit (auto, WAC)</label><input class="fi" type="text" id="s-cost" readonly style="color:var(--text2)"/></div>
@@ -386,6 +386,13 @@ body.locked>*:not(#authGate){display:none}
       <div class="fg"><label class="fl">Payment Status</label><select class="fs" id="s-pay"><option>Paid</option><option>Pending</option><option>Partial</option></select></div>
     </div>
     <button class="btn-save" onclick="saveSale()">✓ Save Sale</button>
+  </div>
+  <div class="tbl-card">
+    <div class="tbl-toolbar"><div class="tbl-title">📋 Journal Entry Preview</div><span class="tbl-sub">Posted automatically when you click Save Sale</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Account</th><th>Partner</th><th>Label</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th></tr></thead>
+      <tbody id="s-journal-preview"></tbody>
+    </table></div>
   </div>
   <div class="tbl-card">
     <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…"/><select class="fsel" id="s-filter-channel"><option>All Platforms</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
@@ -924,7 +931,7 @@ function wireTables(){
   });
 }
 document.addEventListener('DOMContentLoaded',wireTables);
-document.addEventListener('DOMContentLoaded',()=>{ renderPurchasingAll(); renderSalesAll(); });
+document.addEventListener('DOMContentLoaded',()=>{ renderPurchasingAll(); renderSalesAll(); renderSalesJournalPreview(); });
 
 function prependRow(tbodyId,html){
   const tbody=document.getElementById(tbodyId);
@@ -1197,6 +1204,22 @@ function calcGP(){
   const el=document.getElementById('s-gp');
   el.value=totalSale?'EGP '+fmt(gp)+' ('+pct.toFixed(1)+'%)':'';
   el.style.color=gp>0?'var(--green)':gp<0?'var(--red)':'var(--text2)';
+  renderSalesJournalPreview();
+}
+
+function renderSalesJournalPreview(){
+  const partner = document.getElementById('s-ch').value.trim() || '—';
+  const model = document.getElementById('s-mod').value.trim();
+  const ord = document.getElementById('s-ord').value.trim();
+  const qty = n(document.getElementById('s-qty').value)||1;
+  const amtPerUnit = n(document.getElementById('s-amt').value);
+  const total = qty*amtPerUnit;
+  const label = (model?model+' ':'')+(qty?'· Qty '+qty:'')+(ord?' · Order '+ord:'');
+  const tbody = document.getElementById('s-journal-preview');
+  if(!tbody) return;
+  tbody.innerHTML = `
+    <tr><td style="font-weight:600">Accounts Receivable</td><td>${partner}</td><td>${label||'—'}</td><td class="amt" style="text-align:right;color:var(--red)">${fmt(total)}</td><td class="amt" style="text-align:right;color:var(--text3)">–</td></tr>
+    <tr><td style="font-weight:600">Sales Revenue</td><td>${partner}</td><td>${label||'—'}</td><td class="amt" style="text-align:right;color:var(--text3)">–</td><td class="amt" style="text-align:right;color:var(--green)">${fmt(total)}</td></tr>`;
 }
 
 function aggregateSales(){
@@ -1290,7 +1313,8 @@ function saveSale(){
   renderSalesAll();
   resetForm(['s-mod','s-prod','s-ord','s-qty','s-amt','s-cost','s-gp']);
   document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
-  toast('Sale logged — Inventory deducted, AR invoice created','ok');
+  renderSalesJournalPreview();
+  toast('Sale logged — Dr AR / Cr Sales Revenue posted, Inventory deducted','ok');
 }
 
 // ---------- AP ----------
