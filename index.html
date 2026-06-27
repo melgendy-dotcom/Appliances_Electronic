@@ -273,32 +273,19 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-purchasing">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🛒</div><div class="kpi-label">Total PO Value</div><div class="kpi-value" style="color:var(--blue)">EGP 3.2M</div><div class="kpi-sub">205 purchase orders</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Amount Paid</div><div class="kpi-value" style="color:var(--green)">EGP 2.3M</div><div class="kpi-sub">72% of total</div></div>
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">⏳</div><div class="kpi-label">Outstanding Balance</div><div class="kpi-value" style="color:var(--red)">EGP 895K</div><div class="kpi-sub">across 24 suppliers</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">🏢</div><div class="kpi-label">Active Suppliers</div><div class="kpi-value">24</div><div class="kpi-sub">Awlad Mahmoud, الندى + more</div></div>
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🛒</div><div class="kpi-label">Total PO Value</div><div class="kpi-value" style="color:var(--blue)" id="po-kpi-total">0</div><div class="kpi-sub" id="po-kpi-total-sub">0 purchase orders</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Amount Paid</div><div class="kpi-value" style="color:var(--green)" id="po-kpi-paid">0</div><div class="kpi-sub" id="po-kpi-paid-sub">0% of total</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">⏳</div><div class="kpi-label">Outstanding Balance</div><div class="kpi-value" style="color:var(--red)" id="po-kpi-outstanding">0</div><div class="kpi-sub" id="po-kpi-outstanding-sub">across 0 suppliers</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">🏢</div><div class="kpi-label">Active Suppliers</div><div class="kpi-value" id="po-kpi-suppliers">0</div><div class="kpi-sub" id="po-kpi-suppliers-sub">vendors</div></div>
   </div>
   <div class="chart-grid">
     <div class="chart-card">
-      <div class="chart-title">Monthly Purchase Value — 2026</div>
-      <div class="bar-wrap">
-        <div class="bbar" style="height:55%;background:var(--blue);opacity:.8"></div>
-        <div class="bbar" style="height:68%;background:var(--blue);opacity:.8"></div>
-        <div class="bbar" style="height:72%;background:var(--blue);opacity:.8"></div>
-        <div class="bbar" style="height:60%;background:var(--blue);opacity:.8"></div>
-        <div class="bbar" style="height:80%;background:var(--blue);opacity:.85"></div>
-        <div class="bbar" style="height:95%;background:var(--blue)"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.63rem;color:var(--text3)"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+      <div class="chart-title">Purchases by Model (Qty Ordered)</div>
+      <div class="progress-list" id="po-model-chart"></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Top Supplier Spend (EGP)</div>
-      <div class="prog-row"><span class="prog-label">الندى</span><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--blue)"></div></div><span class="prog-val">384,890</span></div>
-      <div class="prog-row"><span class="prog-label">حامد قطوش</span><div class="prog-track"><div class="prog-fill" style="width:81%;background:var(--blue)"></div></div><span class="prog-val">156,110</span></div>
-      <div class="prog-row"><span class="prog-label">عبدالباسط</span><div class="prog-track"><div class="prog-fill" style="width:78%;background:var(--blue)"></div></div><span class="prog-val">79,150</span></div>
-      <div class="prog-row"><span class="prog-label">سعداوي</span><div class="prog-track"><div class="prog-fill" style="width:74%;background:var(--blue)"></div></div><span class="prog-val">76,100</span></div>
-      <div class="prog-row"><span class="prog-label">الهدير</span><div class="prog-track"><div class="prog-fill" style="width:50%;background:var(--blue)"></div></div><span class="prog-val">31,500</span></div>
-      <div class="prog-row"><span class="prog-label">الصبي</span><div class="prog-track"><div class="prog-fill" style="width:47%;background:var(--blue)"></div></div><span class="prog-val">30,180</span></div>
+      <div class="progress-list" id="po-supplier-chart"></div>
     </div>
   </div>
   <div class="form-panel">
@@ -319,15 +306,10 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="savePO()">✓ Save Purchase Order</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel"><option>All Suppliers</option><option>Awlad Mahmoud</option><option>الندى</option></select><select class="fsel"><option>All Methods</option><option>Cash</option><option>Payment Terms</option></select><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><span class="tbl-sub">205 records</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><span class="tbl-sub" id="po-sub">0 records</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th></tr></thead>
-      <tbody id="tb-po">
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td style="font-weight:500">Awlad Mahmoud</td><td class="mono">CH23838A</td><td class="rtl">كبة ميانتا 1.5 لتر</td><td class="mono">2</td><td class="amt">850.00</td><td class="amt">1,700.00</td><td><span class="pill p-green">Cash</span></td><td class="amt">1,700.00</td><td class="amt" style="color:var(--green)">0.00</td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td style="font-weight:500">الندى</td><td class="mono">UFN205</td><td class="rtl">فريزر يونيون اير 205 لتر</td><td class="mono">5</td><td class="amt">13,440.00</td><td class="amt">67,200.00</td><td><span class="pill p-amber">Terms</span></td><td class="amt">0.00</td><td class="amt" style="color:var(--red)">67,200.00</td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">22/06/2026</td><td style="font-weight:500">حامد قطوش</td><td class="mono">MH8265DIS</td><td class="rtl">ميكروويف LG NeoChef 42 لتر</td><td class="mono">3</td><td class="amt">8,159.00</td><td class="amt">24,477.00</td><td><span class="pill p-green">Cash</span></td><td class="amt">24,477.00</td><td class="amt" style="color:var(--green)">0.00</td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">22/06/2026</td><td style="font-weight:500">سعداوي</td><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس 18 بوصة</td><td class="mono">4</td><td class="amt">8,377.00</td><td class="amt">33,508.00</td><td><span class="pill p-amber">Terms</span></td><td class="amt">0.00</td><td class="amt" style="color:var(--red)">33,508.00</td></tr>
-      </tbody>
+      <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
+      <tbody id="tb-po"></tbody>
     </table></div>
   </div>
 </div>
@@ -337,53 +319,32 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-inventory">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">📦</div><div class="kpi-label">Total SKUs</div><div class="kpi-value">663</div><div class="kpi-sub">14 added this month</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">In Stock</div><div class="kpi-value" style="color:var(--green)">420</div><div class="kpi-sub">63% of total SKUs</div></div>
-    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⚠️</div><div class="kpi-label">Low Stock (≤3)</div><div class="kpi-value" style="color:var(--amber)">47</div><div class="kpi-sub">Needs reorder</div></div>
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❌</div><div class="kpi-label">Out of Stock</div><div class="kpi-value" style="color:var(--red)">93</div><div class="kpi-sub">Revenue at risk</div></div>
-    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">💰</div><div class="kpi-label">Stock Value (WAC)</div><div class="kpi-value" style="color:var(--blue)">18.4M</div><div class="kpi-sub">EGP · IAS 2 basis</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">📦</div><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="inv-kpi-skus">0</div><div class="kpi-sub" id="inv-kpi-skus-sub">computed from Purchasing + Sales</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">In Stock</div><div class="kpi-value" style="color:var(--green)" id="inv-kpi-instock">0</div><div class="kpi-sub" id="inv-kpi-instock-sub">0% of total SKUs</div></div>
+    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⚠️</div><div class="kpi-label">Low Stock (≤3)</div><div class="kpi-value" style="color:var(--amber)" id="inv-kpi-low">0</div><div class="kpi-sub">Needs reorder</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❌</div><div class="kpi-label">Out of Stock</div><div class="kpi-value" style="color:var(--red)" id="inv-kpi-out">0</div><div class="kpi-sub">Revenue at risk</div></div>
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">💰</div><div class="kpi-label">Stock Value (WAC)</div><div class="kpi-value" style="color:var(--blue)" id="inv-kpi-value">0</div><div class="kpi-sub">EGP · IAS 2 basis</div></div>
   </div>
   <div class="chart-grid">
     <div class="chart-card">
-      <div class="chart-title">Stock Value by Brand (EGP)</div>
-      <div class="prog-row"><span class="prog-label">Unionaire</span><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div><span class="prog-val">4.2M</span></div>
-      <div class="prog-row"><span class="prog-label">Philips</span><div class="prog-track"><div class="prog-fill" style="width:69%;background:var(--green)"></div></div><span class="prog-val">2.9M</span></div>
-      <div class="prog-row"><span class="prog-label">LG</span><div class="prog-track"><div class="prog-fill" style="width:55%;background:var(--green)"></div></div><span class="prog-val">2.3M</span></div>
-      <div class="prog-row"><span class="prog-label">Sharp</span><div class="prog-track"><div class="prog-fill" style="width:38%;background:var(--green)"></div></div><span class="prog-val">1.6M</span></div>
-      <div class="prog-row"><span class="prog-label">Beko</span><div class="prog-track"><div class="prog-fill" style="width:33%;background:var(--green)"></div></div><span class="prog-val">1.4M</span></div>
-      <div class="prog-row"><span class="prog-label">Others</span><div class="prog-track"><div class="prog-fill" style="width:25%;background:var(--text3)"></div></div><span class="prog-val">6.0M</span></div>
+      <div class="chart-title">Stock Value by Model (EGP)</div>
+      <div class="progress-list" id="inv-value-chart"></div>
     </div>
     <div class="chart-card">
       <div class="chart-title">Stock Status Distribution</div>
       <div class="donut-wrap">
-        <svg width="100" height="100" viewBox="0 0 100 100">
+        <svg width="100" height="100" viewBox="0 0 100 100" id="inv-donut">
           <circle cx="50" cy="50" r="36" fill="none" stroke="#D8DEE4" stroke-width="14"/>
-          <circle cx="50" cy="50" r="36" fill="none" stroke="#1A7F37" stroke-width="14" stroke-dasharray="143 226" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
-          <circle cx="50" cy="50" r="36" fill="none" stroke="#B7791F" stroke-width="14" stroke-dasharray="42 226" stroke-dashoffset="-143" transform="rotate(-90 50 50)"/>
-          <circle cx="50" cy="50" r="36" fill="none" stroke="#CF222E" stroke-width="14" stroke-dasharray="41 226" stroke-dashoffset="-185" transform="rotate(-90 50 50)"/>
-          <text x="50" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="#1F2328" font-family="Inter,sans-serif">63%</text>
-          <text x="50" y="57" text-anchor="middle" font-size="8" fill="#57606A" font-family="Inter,sans-serif">In Stock</text>
         </svg>
-        <div class="dlegend">
-          <div class="dleg-item"><div class="dleg-dot" style="background:var(--green)"></div>In Stock · 420</div>
-          <div class="dleg-item"><div class="dleg-dot" style="background:var(--amber)"></div>Low Stock · 47</div>
-          <div class="dleg-item"><div class="dleg-dot" style="background:var(--red)"></div>Out of Stock · 93</div>
-          <div class="dleg-item"><div class="dleg-dot" style="background:var(--text3)"></div>Negative · 55</div>
-        </div>
+        <div class="dlegend" id="inv-donut-legend"></div>
       </div>
     </div>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Stock Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search model, product, brand…"/><select class="fsel"><option>All Status</option><option>✅ In Stock</option><option>⚠ Low</option><option>❌ Out</option></select><select class="fsel"><option>All Brands</option><option>Philips</option><option>Unionaire</option><option>LG</option><option>Sharp</option></select><button class="btn-import" onclick="triggerImport('inv')">📤 Import Excel</button><span class="tbl-sub">663 SKUs</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Stock Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search model, product…"/><select class="fsel"><option>All Status</option><option>✅ In Stock</option><option>⚠ Low</option><option>❌ Out</option><option>❌ Neg</option></select><button class="btn-import" onclick="triggerImport('inv')" title="Seed/replace opening stock balances">📥 Set Opening Balance</button><span class="tbl-sub" id="inv-sub">0 SKUs</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Model No.</th><th>Product</th><th>Brand</th><th>Avg Cost</th><th>Rcvd</th><th>Sold</th><th>Available</th><th>Stock Value</th><th>Status</th><th>Last Sale</th></tr></thead>
-      <tbody id="tb-inv">
-        <tr><td class="mono">HD9270/90</td><td class="rtl">قلايه هوائيه فيلبس 6.2 لتر</td><td>Philips</td><td class="amt">5,121.50</td><td class="mono">113</td><td class="mono">114</td><td class="mono" style="color:var(--red)">-1</td><td class="amt" style="color:var(--red)">(5,121.50)</td><td><span class="pill p-red">❌ Out</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">UFN205LBLVADH</td><td class="rtl">ديب فريزر يونيون اير 205 لتر</td><td>Unionaire</td><td class="amt">13,440.48</td><td class="mono">42</td><td class="mono">38</td><td class="mono" style="color:var(--green)">4</td><td class="amt">53,761.90</td><td><span class="pill p-green">✅ In</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس 18 بوصة</td><td>Prifix</td><td class="amt">8,377.14</td><td class="mono">28</td><td class="mono">25</td><td class="mono" style="color:var(--amber)">3</td><td class="amt">25,131.43</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">R-77AT-ST</td><td class="rtl">ميكرويف شارب بشواية 34 لتر</td><td>Sharp</td><td class="amt">6,727.27</td><td class="mono">44</td><td class="mono">43</td><td class="mono" style="color:var(--amber)">1</td><td class="amt">6,727.27</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-        <tr><td class="mono">DVS05020S</td><td class="rtl">غسالة أطباق بيكو 10 فرد</td><td>Beko</td><td class="amt">15,976.67</td><td class="mono">15</td><td class="mono">14</td><td class="mono" style="color:var(--amber)">1</td><td class="amt">15,976.67</td><td><span class="pill p-amber">⚠ Low</span></td><td style="color:var(--text2);font-size:.7rem">20/06/2026</td></tr>
-      </tbody>
+      <thead><tr><th>Model No.</th><th>Product</th><th>Avg Cost (WAC)</th><th>Opening</th><th>Rcvd</th><th>Sold</th><th>Available</th><th>Stock Value</th><th>Status</th><th>Last Sale</th></tr></thead>
+      <tbody id="tb-inv"></tbody>
     </table></div>
   </div>
 </div>
@@ -393,62 +354,42 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-sales">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">📈</div><div class="kpi-label">Revenue (MTD)</div><div class="kpi-value" style="color:var(--green)">4.8M</div><div class="kpi-sub">EGP · ↑ 8.4% vs last month</div></div>
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">📦</div><div class="kpi-label">COGS</div><div class="kpi-value">3.9M</div><div class="kpi-sub">EGP · from sales records</div></div>
-    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">💹</div><div class="kpi-label">Gross Profit</div><div class="kpi-value" style="color:var(--accent)">873K</div><div class="kpi-sub">GP% 18.2% · IFRS 15</div></div>
-    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🛍️</div><div class="kpi-label">Transactions</div><div class="kpi-value">1,843</div><div class="kpi-sub">Avg order EGP 2,604</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">📈</div><div class="kpi-label">Revenue</div><div class="kpi-value" style="color:var(--green)" id="s-kpi-revenue">0</div><div class="kpi-sub" id="s-kpi-revenue-sub">EGP</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">📦</div><div class="kpi-label">COGS</div><div class="kpi-value" id="s-kpi-cogs">0</div><div class="kpi-sub">EGP · WAC from Purchasing</div></div>
+    <div class="kpi-card" style="--card-accent:var(--accent)"><div class="kpi-icon">💹</div><div class="kpi-label">Gross Profit</div><div class="kpi-value" style="color:var(--accent)" id="s-kpi-gp">0</div><div class="kpi-sub" id="s-kpi-gp-sub">GP% — · IFRS 15</div></div>
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🛍️</div><div class="kpi-label">Transactions</div><div class="kpi-value" id="s-kpi-txns">0</div><div class="kpi-sub" id="s-kpi-txns-sub">Avg order EGP 0</div></div>
   </div>
   <div class="chart-grid">
     <div class="chart-card">
-      <div class="chart-title">Monthly Revenue vs COGS</div>
-      <div class="bar-wrap">
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:52%;background:var(--green);opacity:.8"></div><div class="bbar" style="height:43%;background:var(--red);opacity:.7"></div></div>
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:60%;background:var(--green);opacity:.8"></div><div class="bbar" style="height:50%;background:var(--red);opacity:.7"></div></div>
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:65%;background:var(--green);opacity:.8"></div><div class="bbar" style="height:55%;background:var(--red);opacity:.7"></div></div>
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:57%;background:var(--green);opacity:.8"></div><div class="bbar" style="height:47%;background:var(--red);opacity:.7"></div></div>
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:74%;background:var(--green);opacity:.85"></div><div class="bbar" style="height:62%;background:var(--red);opacity:.8"></div></div>
-        <div style="display:flex;flex-direction:column;gap:3px;align-items:center;flex:1"><div class="bbar" style="height:92%;background:var(--green)"></div><div class="bbar" style="height:76%;background:var(--red)"></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.63rem;color:var(--text3)"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
-      <div style="display:flex;gap:14px;margin-top:7px;font-size:.65rem;color:var(--text3)"><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--green);border-radius:2px;display:inline-block"></span>Revenue</span><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--red);border-radius:2px;display:inline-block"></span>COGS</span></div>
+      <div class="chart-title">Revenue vs COGS by Model</div>
+      <div class="progress-list" id="s-model-chart"></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Sales by Channel (MTD)</div>
-      <div class="prog-row"><span class="prog-label">Jumia</span><div class="prog-track"><div class="prog-fill" style="width:100%;background:var(--amber)"></div></div><span class="prog-val">34%</span></div>
-      <div class="prog-row"><span class="prog-label">Noon</span><div class="prog-track"><div class="prog-fill" style="width:74%;background:var(--blue)"></div></div><span class="prog-val">25%</span></div>
-      <div class="prog-row"><span class="prog-label">B Tech</span><div class="prog-track"><div class="prog-fill" style="width:53%;background:var(--green)"></div></div><span class="prog-val">18%</span></div>
-      <div class="prog-row"><span class="prog-label">Raneen</span><div class="prog-track"><div class="prog-fill" style="width:35%;background:var(--purple)"></div></div><span class="prog-val">12%</span></div>
-      <div class="prog-row"><span class="prog-label">Raya</span><div class="prog-track"><div class="prog-fill" style="width:21%;background:var(--red)"></div></div><span class="prog-val">7%</span></div>
-      <div class="prog-row"><span class="prog-label">In Store</span><div class="prog-track"><div class="prog-fill" style="width:12%;background:var(--text2)"></div></div><span class="prog-val">4%</span></div>
+      <div class="chart-title">Sales by Platform</div>
+      <div class="progress-list" id="s-platform-chart"></div>
     </div>
   </div>
   <div class="form-panel">
     <div class="form-title">➕ Log New Sale</div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Sale Date</label><input class="fi" type="date" id="s-date"/></div>
-      <div class="fg"><label class="fl">Channel</label><select class="fs" id="s-ch"><option>B Tech</option><option>In Store</option><option>Jumia</option><option>Noon</option><option>Raneen</option><option>Raya</option></select></div>
-      <div class="fg"><label class="fl">Model No.</label><input class="fi" type="text" id="s-mod" placeholder="e.g. HD9270/90"/></div>
-      <div class="fg"><label class="fl">Product Name (AR)</label><input class="fi" type="text" id="s-prod" dir="rtl" placeholder="اسم المنتج"/></div>
-      <div class="fg"><label class="fl">Brand</label><input class="fi" type="text" id="s-brand" placeholder="e.g. Philips"/></div>
+      <div class="fg"><label class="fl">Platform / Channel</label><input class="fi" type="text" id="s-ch" placeholder="e.g. Noon, Raya, Kenzz"/></div>
+      <div class="fg"><label class="fl">Model No.</label><input class="fi" type="text" id="s-mod" placeholder="e.g. JB0123WH" oninput="autofillFromModel('s')"/></div>
+      <div class="fg"><label class="fl">Product Name (AR)</label><input class="fi" type="text" id="s-prod" dir="rtl" placeholder="اسم المنتج" readonly style="color:var(--text2)"/></div>
       <div class="fg"><label class="fl">Order No.</label><input class="fi" type="text" id="s-ord"/></div>
       <div class="fg"><label class="fl">Qty Sold</label><input class="fi" type="number" id="s-qty" value="1" oninput="calcGP()"/></div>
-      <div class="fg"><label class="fl">Sale Amount (EGP)</label><input class="fi" type="number" id="s-amt" placeholder="0.00" oninput="calcGP()"/></div>
-      <div class="fg"><label class="fl">Cost Amount (EGP)</label><input class="fi" type="number" id="s-cost" placeholder="0.00" oninput="calcGP()"/></div>
+      <div class="fg"><label class="fl">Sale Amount / unit (EGP)</label><input class="fi" type="number" id="s-amt" placeholder="0.00" oninput="calcGP()"/></div>
+      <div class="fg"><label class="fl">Cost / unit (auto, WAC)</label><input class="fi" type="text" id="s-cost" readonly style="color:var(--text2)"/></div>
       <div class="fg"><label class="fl">GP (auto)</label><input class="fi" type="text" id="s-gp" readonly style="color:var(--text2)"/></div>
       <div class="fg"><label class="fl">Payment Status</label><select class="fs" id="s-pay"><option>Paid</option><option>Pending</option><option>Partial</option></select></div>
     </div>
     <button class="btn-save" onclick="saveSale()">✓ Save Sale</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, channel, order…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option><option>Raya</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option></select><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub">1,843 transactions</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…"/><select class="fsel" id="s-filter-channel"><option>All Platforms</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Channel</th><th>Model</th><th>Product</th><th>Brand</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th></tr></thead>
-      <tbody id="tb-sales">
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--amber)">Jumia</span></td><td class="mono">DC102</td><td class="rtl">مبرد هواء بريفيكس</td><td>Prifix</td><td class="mono">2</td><td class="amt">20,000.00</td><td class="amt">16,754.28</td><td class="amt" style="color:var(--green)">3,245.72</td><td class="mono" style="color:var(--green)">16.2%</td><td><span class="pill p-green">Paid</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(88,166,255,.12);color:var(--blue)">Noon</span></td><td class="mono">UFN205</td><td class="rtl">فريزر يونيون اير</td><td>Unionaire</td><td class="mono">1</td><td class="amt">16,500.00</td><td class="amt">13,440.48</td><td class="amt" style="color:var(--green)">3,059.52</td><td class="mono" style="color:var(--green)">18.5%</td><td><span class="pill p-green">Paid</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(63,185,80,.12);color:var(--green)">B Tech</span></td><td class="mono">MH8265DIS</td><td class="rtl">ميكروويف LG NeoChef</td><td>LG</td><td class="mono">1</td><td class="amt">9,500.00</td><td class="amt">8,159.09</td><td class="amt" style="color:var(--green)">1,340.91</td><td class="mono" style="color:var(--green)">14.1%</td><td><span class="pill p-amber">Pending</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(188,140,255,.12);color:var(--purple)">Raneen</span></td><td class="mono">R-77AT-ST</td><td class="rtl">ميكرويف شارب 34 لتر</td><td>Sharp</td><td class="mono">1</td><td class="amt">7,800.00</td><td class="amt">6,727.27</td><td class="amt" style="color:var(--green)">1,072.73</td><td class="mono" style="color:var(--green)">13.8%</td><td><span class="pill p-green">Paid</span></td></tr>
-      </tbody>
+      <thead><tr><th>Date</th><th>Platform</th><th>Model</th><th>Product</th><th>Order #</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="tb-sales"></tbody>
     </table></div>
   </div>
 </div>
@@ -561,41 +502,35 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-ar">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">📥</div><div class="kpi-label">Total AR Outstanding</div><div class="kpi-value" style="color:var(--blue)">1.2M</div><div class="kpi-sub">EGP · all channels</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Collected (MTD)</div><div class="kpi-value" style="color:var(--green)">3.6M</div><div class="kpi-sub">EGP · settled invoices</div></div>
-    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⏳</div><div class="kpi-label">Pending Settlement</div><div class="kpi-value" style="color:var(--amber)">312K</div><div class="kpi-sub">EGP · Jumia + Noon</div></div>
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❗</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--red)">88K</div><div class="kpi-sub">EGP · Raneen</div></div>
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">📥</div><div class="kpi-label">Total AR Outstanding</div><div class="kpi-value" style="color:var(--blue)" id="ar-kpi-outstanding">0</div><div class="kpi-sub" id="ar-kpi-outstanding-sub">EGP · all platforms</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Collected</div><div class="kpi-value" style="color:var(--green)" id="ar-kpi-collected">0</div><div class="kpi-sub">EGP · receipts logged</div></div>
+    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">⏳</div><div class="kpi-label">Total Invoiced</div><div class="kpi-value" style="color:var(--amber)" id="ar-kpi-invoiced">0</div><div class="kpi-sub" id="ar-kpi-invoiced-sub">EGP · from Sales</div></div>
+    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❗</div><div class="kpi-label">Overdue &gt;30d</div><div class="kpi-value" style="color:var(--red)" id="ar-kpi-overdue">0</div><div class="kpi-sub" id="ar-kpi-overdue-sub">EGP</div></div>
   </div>
   <div class="aging-grid">
-    <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)">EGP 824K</div><div class="aging-track"><div class="aging-fill" style="width:90%;background:var(--green)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--amber)">EGP 200K</div><div class="aging-track"><div class="aging-fill" style="width:45%;background:var(--amber)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)">EGP 88K</div><div class="aging-track"><div class="aging-fill" style="width:25%;background:var(--red)"></div></div></div>
-    <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)">EGP 88K</div><div class="aging-track"><div class="aging-fill" style="width:20%;background:var(--red)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">Current 0–30 Days</div><div class="aging-val" style="color:var(--green)" id="ar-age-current">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ar-age-current-bar" style="width:0%;background:var(--green)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">31–60 Days</div><div class="aging-val" style="color:var(--amber)" id="ar-age-due">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ar-age-due-bar" style="width:0%;background:var(--amber)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">61–90 Days</div><div class="aging-val" style="color:var(--red)" id="ar-age-overdue">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ar-age-overdue-bar" style="width:0%;background:var(--red)"></div></div></div>
+    <div class="aging-card"><div class="aging-label">Over 90 Days</div><div class="aging-val" style="color:var(--red)" id="ar-age-critical">EGP 0</div><div class="aging-track"><div class="aging-fill" id="ar-age-critical-bar" style="width:0%;background:var(--red)"></div></div></div>
   </div>
+  <div class="ledger-banner" style="color:var(--text2)">ℹ️ Sales Invoice rows are created automatically from the Sales register (Dr AR / Cr Sales Revenue, partner = Platform). Use this form only to log a <strong>Receipt</strong> or <strong>Credit Note</strong> against an existing receivable.</div>
   <div class="form-panel">
-    <div class="form-title">➕ Log AR Invoice / Receipt</div>
+    <div class="form-title">➕ Log AR Receipt / Credit Note</div>
     <div class="form-grid">
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="ar-date"/></div>
-      <div class="fg"><label class="fl">Customer / Channel</label><select class="fs" id="ar-cust"><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option><option>Raya</option><option>In Store</option></select></div>
-      <div class="fg"><label class="fl">Transaction Type</label><select class="fs" id="ar-type"><option>Sales Invoice</option><option>Receipt</option><option>Credit Note</option><option>Marketplace Settlement</option></select></div>
-      <div class="fg"><label class="fl">Invoice / Ref #</label><input class="fi" type="text" id="ar-ref" placeholder="INV-2026-001"/></div>
-      <div class="fg"><label class="fl">Invoice Amount (EGP)</label><input class="fi" type="number" id="ar-inv" placeholder="0.00" oninput="calcAR()"/></div>
-      <div class="fg"><label class="fl">Commission % (if any)</label><input class="fi" type="number" id="ar-comm" placeholder="e.g. 12.5" oninput="calcAR()"/></div>
-      <div class="fg"><label class="fl">Net Receivable (auto)</label><input class="fi" type="text" id="ar-net" readonly style="color:var(--text2)"/></div>
-      <div class="fg"><label class="fl">Payment Status</label><select class="fs" id="ar-status"><option>Pending</option><option>Received</option><option>Partial</option></select></div>
+      <div class="fg"><label class="fl">Partner / Platform</label><input class="fi" type="text" id="ar-cust" placeholder="e.g. Noon, Raya, Kenzz"/></div>
+      <div class="fg"><label class="fl">Transaction Type</label><select class="fs" id="ar-type"><option>Receipt</option><option>Credit Note</option><option>Marketplace Settlement</option></select></div>
+      <div class="fg"><label class="fl">Ref #</label><input class="fi" type="text" id="ar-ref" placeholder="e.g. order or settlement #"/></div>
+      <div class="fg"><label class="fl">Amount (EGP)</label><input class="fi" type="number" id="ar-inv" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" type="text" id="ar-notes" placeholder="optional"/></div>
     </div>
-    <button class="btn-save" onclick="saveAR()">✓ Save AR Entry</button>
+    <button class="btn-save" onclick="saveAR()">✓ Save Entry</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">AR Receivables Register</div><input class="search-inp" type="text" placeholder="🔍 Search channel, invoice…"/><select class="fsel"><option>All Channels</option><option>Jumia</option><option>Noon</option><option>B Tech</option><option>Raneen</option></select><select class="fsel"><option>All Status</option><option>Pending</option><option>Received</option><option>Overdue</option></select><button class="btn-import" onclick="triggerImport('ar')">📤 Import Excel</button><span class="tbl-sub">EGP 1.2M outstanding</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">AR Receivables Register</div><input class="search-inp" type="text" placeholder="🔍 Search platform, ref…"/><select class="fsel" id="ar-filter-platform"><option>All Platforms</option></select><select class="fsel"><option>All Types</option><option>Sales Invoice</option><option>Receipt</option><option>Credit Note</option><option>Marketplace Settlement</option></select><span class="tbl-sub" id="ar-sub">0 entries</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Channel</th><th>Type</th><th>Ref #</th><th>Invoice (EGP)</th><th>Commission</th><th>Net Receivable</th><th>Due Date</th><th>Status</th></tr></thead>
-      <tbody id="tb-ar">
-        <tr><td style="color:var(--text2);font-size:.7rem">20/06/2026</td><td><span class="badge" style="background:rgba(232,160,32,.12);color:var(--amber)">Jumia</span></td><td>Settlement</td><td class="mono">JUM-SEL-0612</td><td class="amt">312,000.00</td><td class="mono">12.0%</td><td class="amt" style="color:var(--blue)">274,560.00</td><td style="color:var(--text2);font-size:.7rem">30/06/2026</td><td><span class="pill p-amber">Pending</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">15/06/2026</td><td><span class="badge" style="background:rgba(88,166,255,.12);color:var(--blue)">Noon</span></td><td>Settlement</td><td class="mono">NOON-0615</td><td class="amt">185,000.00</td><td class="mono">10.5%</td><td class="amt" style="color:var(--blue)">165,575.00</td><td style="color:var(--text2);font-size:.7rem">25/06/2026</td><td><span class="pill p-amber">Pending</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">10/06/2026</td><td><span class="badge" style="background:rgba(63,185,80,.12);color:var(--green)">B Tech</span></td><td>Invoice</td><td class="mono">BTECH-0610</td><td class="amt">95,000.00</td><td class="mono">0.0%</td><td class="amt" style="color:var(--green)">95,000.00</td><td style="color:var(--text2);font-size:.7rem">10/07/2026</td><td><span class="pill p-green">Received</span></td></tr>
-        <tr><td style="color:var(--text2);font-size:.7rem">01/05/2026</td><td><span class="badge" style="background:rgba(188,140,255,.12);color:var(--purple)">Raneen</span></td><td>Invoice</td><td class="mono">RAN-0501</td><td class="amt">88,000.00</td><td class="mono">8.0%</td><td class="amt" style="color:var(--red)">80,960.00</td><td style="color:var(--red);font-size:.7rem">31/05/2026</td><td><span class="pill p-red">Overdue</span></td></tr>
-      </tbody>
+      <thead><tr><th>Date</th><th>Partner</th><th>Type</th><th>Ref #</th><th>Amount (EGP)</th><th>Aging</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="tb-ar"></tbody>
     </table></div>
   </div>
 </div>
@@ -987,6 +922,7 @@ function wireTables(){
   });
 }
 document.addEventListener('DOMContentLoaded',wireTables);
+document.addEventListener('DOMContentLoaded',()=>{ renderPurchasingAll(); renderSalesAll(); });
 
 function prependRow(tbodyId,html){
   const tbody=document.getElementById(tbodyId);
@@ -996,6 +932,71 @@ function prependRow(tbodyId,html){
 }
 
 function resetForm(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName!=='SELECT')el.value='';});}
+
+// ---------- Purchasing / Inventory / Sales / AR — connected ERP-style structure ----------
+// Single sources of truth: PURCHASE_ORDERS, INVENTORY_OPENING, SALES_TRANSACTIONS
+// Inventory = computed from Opening + Purchasing − Sales (per Model No.)
+// AR = computed from Sales (Dr AR / Cr Sales Revenue, partner = Platform) + manual receipts/credit notes
+
+const PURCHASE_ORDERS = [
+  {date:'2026-06-25', supplier:'الندى', model:'JB0123WH', orderNo:2479, qty:20, unitCost:2250, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الفتح', model:'AC1065TR', orderNo:2480, qty:20, unitCost:4850, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'حامد قطوش', model:'Fresh-500011386', orderNo:2481, qty:20, unitCost:750, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'CFJ-563', orderNo:2482, qty:20, unitCost:3550, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'CFJ-561', orderNo:2482, qty:20, unitCost:2750, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'DC101', orderNo:2482, qty:20, unitCost:4100, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الفتح', model:'AC1190TR', orderNo:2484, qty:20, unitCost:5200, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الفتح', model:'FAS 5030', orderNo:2484, qty:20, unitCost:4300, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'EC890.M', orderNo:2485, qty:20, unitCost:9900, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'حازم سيلمان', model:'FUFW12C/IW-AG', orderNo:2486, qty:20, unitCost:17700, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'عبدالباسط', model:'AK-18WallFan', orderNo:2487, qty:20, unitCost:660, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'عبدالباسط', model:'ATA43FLS', orderNo:2487, qty:20, unitCost:8700, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'WFS-181', orderNo:2488, qty:20, unitCost:1835, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الندى', model:'CFS-54', orderNo:2490, qty:20, unitCost:1430, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'حازم سليمان', model:'Fresh-500005314', orderNo:2491, qty:20, unitCost:1850, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'حازم سليمان', model:'BOX 14', orderNo:2491, qty:20, unitCost:1080, method:'N/A', paid:0},
+  {date:'2026-06-25', supplier:'الروضه', model:'ART012CY50XFR-SG-SER-S1', orderNo:2492, qty:20, unitCost:16500, method:'N/A', paid:0},
+];
+PURCHASE_ORDERS.forEach((t,i)=>t._id=i);
+let _poNextId = PURCHASE_ORDERS.length;
+
+const INVENTORY_OPENING = [
+  {model:'JB0123WH', product:'خلاط كهربائي براون 1.5 لتر 500 وات ابيض', openingQty:100, unitCost:2250},
+  {model:'AC1065TR', product:'مبرد هواء كاسيل ديجيتال، 65 لتر، ابيض وبيج', openingQty:100, unitCost:4850},
+  {model:'Fresh-500011386', product:'كاتل زجاج فريش EGK17000، سعة 1.7 لتر، 2200 واط، لون اسود شفاف', openingQty:100, unitCost:750},
+  {model:'CFJ-563', product:'مروحة سقف بريفكس Jumbo، مقاس 56 بوصة، بني - CFJ-563', openingQty:100, unitCost:3550},
+  {model:'CFJ-561', product:'مروحة سقف بريفكس جامبو، 56 بوصة، خشبي - JCF-561', openingQty:100, unitCost:2750},
+  {model:'DC101', product:'مكيف هواء بريفكس، 18 بوصة، 70 لتر، - ابيض', openingQty:100, unitCost:4100},
+  {model:'AC1190TR', product:'مبرد هواء كاسل سعة 90 لترًا، رقمي مع جهاز تحكم عن بعد، متعدد الألوان - AC1190TR', openingQty:100, unitCost:5200},
+  {model:'FAS 5030', product:'مروحة ستاند كاسيل، 30 بوصة، اسود - FAS 5030 N', openingQty:100, unitCost:4300},
+  {model:'EC890.M', product:'ماكينة قهوة ديلونجي ديديكا ديو EC890.M', openingQty:100, unitCost:9900},
+  {model:'FUFW12C/IW-AG', product:'تكييف فريش، 1.5 حصان، بارد فقط، ابيض - FUFW12C/IW-AG', openingQty:100, unitCost:17700},
+  {model:'AK-18WallFan', product:'مروحة حائط اكاي، 18 بوصة، 5 ريشة', openingQty:100, unitCost:660},
+  {model:'ATA43FLS', product:'شاشة تلفزيون سمارت ايه تي ايه مقاس 43 بوصه LED، بدقة FHD', openingQty:100, unitCost:8700},
+  {model:'WFS-181', product:'مروحة حائط بريفيكس شارك بريموت كنترول، 18 بوصة، اسود', openingQty:100, unitCost:1835},
+  {model:'CFS-54', product:'مروحة سقف بريفيكس روكيت، 54 بوصة، رمادي', openingQty:100, unitCost:1430},
+  {model:'Fresh-500005314', product:'مروحة حائط فريش شبح، 20 بوصة، اسود واحمر', openingQty:100, unitCost:1850},
+  {model:'BOX 14', product:'مروحة بوكس فريش قمر - 14 بوصة', openingQty:100, unitCost:1080},
+  {model:'ART012CY50XFR-SG-SER-S1', product:'تكيف يونيون اير ١.٥ حصان ارتيفاي بارد فقط', openingQty:100, unitCost:16500},
+];
+
+const SALES_TRANSACTIONS = [
+  {date:'2026-06-27', platform:'2. Noon', model:'JB0123WH', orderNo:2009881747, qty:2, saleAmount:6000, status:'Pending'},
+  {date:'2026-06-27', platform:'1. Raya', model:'AC1065TR', orderNo:2009880286, qty:2, saleAmount:7000, status:'Pending'},
+  {date:'2026-06-27', platform:'7. Kenzz', model:'Fresh-500011386', orderNo:2009877544, qty:2, saleAmount:1000, status:'Pending'},
+];
+SALES_TRANSACTIONS.forEach((t,i)=>t._id=i);
+let _salesNextId = SALES_TRANSACTIONS.length;
+
+const AR_MANUAL_ENTRIES = [];
+let _arNextId = 0;
+
+function modelLookup(){
+  const map = {};
+  INVENTORY_OPENING.forEach(o=>{ map[o.model] = {product:o.product}; });
+  PURCHASE_ORDERS.forEach(p=>{ if(!map[p.model]) map[p.model] = {product:''}; });
+  return map;
+}
 
 // ---------- Purchasing ----------
 function calcPO(){
@@ -1009,48 +1010,283 @@ function calcPO(){
   el.value=(total||p)?fmt(bal):'';
   el.style.color=bal>0?'var(--red)':bal<0?'var(--accent)':'var(--green)';
 }
+
+function aggregatePurchasing(){
+  const bySupplier = {}, byModel = {};
+  let totalValue=0, totalPaid=0;
+  PURCHASE_ORDERS.forEach(p=>{
+    const total = p.qty*p.unitCost;
+    totalValue += total; totalPaid += (p.paid||0);
+    bySupplier[p.supplier] = (bySupplier[p.supplier]||0) + total;
+    byModel[p.model] = (byModel[p.model]||0) + p.qty;
+  });
+  return {totalValue, totalPaid, outstanding: totalValue-totalPaid, bySupplier, byModel, supplierCount: Object.keys(bySupplier).length};
+}
+
+function renderPurchasingAll(){
+  const agg = aggregatePurchasing();
+  const sorted = [...PURCHASE_ORDERS].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  const rowsHtml = sorted.map(p=>{
+    const total = p.qty*p.unitCost, bal = total-(p.paid||0);
+    const info = modelLookup()[p.model] || {product:''};
+    const methodPill = p.method==='Cash'?'p-green':p.method==='Payment Terms'?'p-amber':p.method==='N/A'?'p-grey':'p-blue';
+    const rtl = isArabic(p.supplier) ? 'direction:rtl' : '';
+    return `<tr><td style="color:var(--text2);font-size:.7rem">${fmtDateISO(p.date)}</td><td style="font-weight:500;${rtl}">${p.supplier}</td><td class="mono">${p.model}</td><td class="rtl">${info.product||''}</td><td class="mono">${p.qty}</td><td class="amt">${fmt(p.unitCost)}</td><td class="amt">${fmt(total)}</td><td><span class="pill ${methodPill}">${p.method}</span></td><td class="amt">${fmt(p.paid||0)}</td><td class="amt" style="color:${bal>0?'var(--red)':'var(--green)'}">${fmt(bal)}</td><td><button class="btn-del" onclick="deletePurchaseOrder(${p._id})" title="Delete">🗑</button></td></tr>`;
+  }).join('');
+  document.getElementById('tb-po').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="11" style="text-align:center;color:var(--text2);padding:22px">No purchase orders yet</td></tr>';
+
+  document.getElementById('po-kpi-total').textContent = fmt(agg.totalValue);
+  document.getElementById('po-kpi-total-sub').textContent = PURCHASE_ORDERS.length+' purchase orders';
+  document.getElementById('po-kpi-paid').textContent = fmt(agg.totalPaid);
+  document.getElementById('po-kpi-paid-sub').textContent = (agg.totalValue? (agg.totalPaid/agg.totalValue*100).toFixed(0):0)+'% of total';
+  document.getElementById('po-kpi-outstanding').textContent = fmt(agg.outstanding);
+  document.getElementById('po-kpi-outstanding-sub').textContent = 'across '+agg.supplierCount+' suppliers';
+  document.getElementById('po-kpi-suppliers').textContent = agg.supplierCount;
+
+  const modelEntries = Object.entries(agg.byModel).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxModelQty = Math.max(...modelEntries.map(e=>e[1]),1);
+  document.getElementById('po-model-chart').innerHTML = modelEntries.map(([m,qty])=>
+    `<div class="prog-row"><span class="prog-label">${m}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,qty/maxModelQty*100)}%;background:var(--blue)"></div></div><span class="prog-val">${qty}</span></div>`
+  ).join('') || '<div style="color:var(--text2);font-size:.78rem">No data yet</div>';
+
+  const supplierEntries = Object.entries(agg.bySupplier).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxSupplier = Math.max(...supplierEntries.map(e=>e[1]),1);
+  document.getElementById('po-supplier-chart').innerHTML = supplierEntries.map(([s,amt])=>
+    `<div class="prog-row"><span class="prog-label">${s}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,amt/maxSupplier*100)}%;background:var(--blue)"></div></div><span class="prog-val">${fmt(amt)}</span></div>`
+  ).join('') || '<div style="color:var(--text2);font-size:.78rem">No data yet</div>';
+
+  const suppliers = [...new Set(PURCHASE_ORDERS.map(p=>p.supplier))].sort();
+  const supSel = document.getElementById('po-filter-supplier');
+  const supPrev = supSel.value;
+  supSel.innerHTML = '<option>All Suppliers</option>'+suppliers.map(s=>`<option value="${s}">${s}</option>`).join('');
+  if(suppliers.includes(supPrev)) supSel.value = supPrev;
+
+  document.getElementById('po-sub').textContent = PURCHASE_ORDERS.length+' records';
+  renderInventoryAll();
+}
+
+function deletePurchaseOrder(id){
+  const idx = PURCHASE_ORDERS.findIndex(p=>p._id===id);
+  if(idx===-1) return;
+  const p = PURCHASE_ORDERS[idx];
+  if(!confirm('Delete this purchase order?\n'+p.supplier+' · '+p.model+' · Qty '+p.qty)) return;
+  PURCHASE_ORDERS.splice(idx,1);
+  renderPurchasingAll();
+  toast('Purchase order deleted — Inventory updated','ok');
+}
+
 function savePO(){
   const sup=document.getElementById('po-sup').value.trim();
+  const model=document.getElementById('po-model').value.trim();
   const qty=n(document.getElementById('po-qty').value),unit=n(document.getElementById('po-unit').value);
-  if(!sup||!qty||!unit){toast('Supplier, qty and unit cost are required','err');return;}
-  const model=document.getElementById('po-model').value.trim()||'—';
-  const prod=document.getElementById('po-prod').value.trim();
+  if(!sup||!model||!qty||!unit){toast('Supplier, model, qty and unit cost are required','err');return;}
+  const date=document.getElementById('po-date').value || new Date().toISOString().split('T')[0];
   const method=document.getElementById('po-method').value;
   const paid=n(document.getElementById('po-paid').value);
-  const total=qty*unit,bal=total-paid;
-  const methodPill=method==='Cash'?'p-green':method==='Payment Terms'?'p-amber':'p-blue';
-  prependRow('tb-po','<tr><td style="color:var(--text2);font-size:.7rem">'+todayStr()+'</td><td style="font-weight:500">'+sup+'</td><td class="mono">'+model+'</td><td class="rtl">'+prod+'</td><td class="mono">'+qty+'</td><td class="amt">'+fmt(unit)+'</td><td class="amt">'+fmt(total)+'</td><td><span class="pill '+methodPill+'">'+method+'</span></td><td class="amt">'+fmt(paid)+'</td><td class="amt" style="color:'+(bal>0?'var(--red)':'var(--green)')+'">'+fmt(bal)+'</td></tr>');
+  PURCHASE_ORDERS.push({date, supplier:sup, model, orderNo:'', qty, unitCost:unit, method, paid, _id:_poNextId++});
+  renderPurchasingAll();
   resetForm(['po-sup','po-model','po-prod','po-qty','po-unit','po-total','po-paid','po-bal']);
   document.getElementById('po-date').value=new Date().toISOString().split('T')[0];
-  toast('Purchase order saved','ok');
+  toast('Purchase order saved — Inventory updated','ok');
+}
+
+// ---------- Inventory (fully computed: Opening + Purchasing − Sales) ----------
+function computeInventory(){
+  const models = {};
+  INVENTORY_OPENING.forEach(o=>{
+    models[o.model] = {product:o.product, openingQty:o.openingQty, openingCost:o.unitCost, rcvd:0, purchValue:0, sold:0, lastSale:null};
+  });
+  PURCHASE_ORDERS.forEach(p=>{
+    if(!models[p.model]) models[p.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, lastSale:null};
+    models[p.model].rcvd += p.qty;
+    models[p.model].purchValue += p.qty*p.unitCost;
+  });
+  SALES_TRANSACTIONS.forEach(s=>{
+    if(!models[s.model]) models[s.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, lastSale:null};
+    models[s.model].sold += s.qty;
+    const d = new Date(s.date);
+    if(!isNaN(d) && (!models[s.model].lastSale || d>models[s.model].lastSale)) models[s.model].lastSale = d;
+  });
+  return Object.entries(models).map(([model,m])=>{
+    const totalQtyForWAC = m.openingQty + m.rcvd;
+    const wac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue) / totalQtyForWAC : m.openingCost;
+    const available = m.openingQty + m.rcvd - m.sold;
+    return {model, product:m.product, avgCost:wac, opening:m.openingQty, rcvd:m.rcvd, sold:m.sold, available, stockValue:wac*available, lastSale:m.lastSale};
+  }).sort((a,b)=>b.stockValue-a.stockValue);
+}
+
+function renderInventoryAll(){
+  const list = computeInventory();
+  const total = list.length;
+  const inStock = list.filter(x=>x.available>3).length;
+  const low = list.filter(x=>x.available>=1 && x.available<=3).length;
+  const out = list.filter(x=>x.available===0).length;
+  const neg = list.filter(x=>x.available<0).length;
+  const stockValue = list.reduce((s,x)=>s+x.stockValue,0);
+
+  document.getElementById('inv-kpi-skus').textContent = total;
+  document.getElementById('inv-kpi-instock').textContent = inStock;
+  document.getElementById('inv-kpi-instock-sub').textContent = (total?(inStock/total*100).toFixed(0):0)+'% of total SKUs';
+  document.getElementById('inv-kpi-low').textContent = low;
+  document.getElementById('inv-kpi-out').textContent = out;
+  document.getElementById('inv-kpi-value').textContent = fmt(stockValue);
+
+  function statusInfo(avail){
+    if(avail>3) return ['p-green','✅ In','var(--green)'];
+    if(avail>=1) return ['p-amber','⚠ Low','var(--amber)'];
+    if(avail===0) return ['p-red','❌ Out','var(--text2)'];
+    return ['p-red','❌ Neg','var(--red)'];
+  }
+  const rowsHtml = list.map(x=>{
+    const [pill,label,availColor] = statusInfo(x.available);
+    return `<tr><td class="mono">${x.model}</td><td class="rtl">${x.product||'—'}</td><td class="amt">${fmt(x.avgCost)}</td><td class="mono">${x.opening}</td><td class="mono">${x.rcvd}</td><td class="mono">${x.sold}</td><td class="mono" style="color:${availColor}">${x.available}</td><td class="amt" style="color:${x.stockValue<0?'var(--red)':''}">${fmt(x.stockValue)}</td><td><span class="pill ${pill}">${label}</span></td><td style="color:var(--text2);font-size:.7rem">${x.lastSale?x.lastSale.toLocaleDateString('en-GB'):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('tb-inv').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="10" style="text-align:center;color:var(--text2);padding:22px">No inventory data yet</td></tr>';
+  document.getElementById('inv-sub').textContent = total+' SKUs';
+
+  const topByValue = list.slice(0,8);
+  const maxVal = Math.max(...topByValue.map(x=>x.stockValue),1);
+  document.getElementById('inv-value-chart').innerHTML = topByValue.map(x=>
+    `<div class="prog-row"><span class="prog-label">${x.model}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,x.stockValue/maxVal*100)}%;background:var(--green)"></div></div><span class="prog-val">${fmt(x.stockValue)}</span></div>`
+  ).join('') || '<div style="color:var(--text2);font-size:.78rem">No data yet</div>';
+
+  const segs = [
+    {label:'In Stock', value:inStock, color:'#1A7F37'},
+    {label:'Low Stock', value:low, color:'#B7791F'},
+    {label:'Out of Stock', value:out, color:'#CF222E'},
+    {label:'Negative', value:neg, color:'#6E7781'},
+  ];
+  const sumSeg = segs.reduce((s,x)=>s+x.value,0) || 1;
+  let offset = 0;
+  const circumference = 226;
+  const circles = segs.filter(s=>s.value>0).map(s=>{
+    const len = (s.value/sumSeg)*circumference;
+    const html = `<circle cx="50" cy="50" r="36" fill="none" stroke="${s.color}" stroke-width="14" stroke-dasharray="${len.toFixed(1)} ${circumference}" stroke-dashoffset="${-offset.toFixed(1)}" transform="rotate(-90 50 50)"/>`;
+    offset += len;
+    return html;
+  }).join('');
+  const pct = total? (inStock/total*100).toFixed(0) : 0;
+  document.getElementById('inv-donut').innerHTML = `<circle cx="50" cy="50" r="36" fill="none" stroke="#D8DEE4" stroke-width="14"/>${circles}<text x="50" y="46" text-anchor="middle" font-size="12" font-weight="700" fill="#1F2328" font-family="Inter,sans-serif">${pct}%</text><text x="50" y="57" text-anchor="middle" font-size="8" fill="#57606A" font-family="Inter,sans-serif">In Stock</text>`;
+  document.getElementById('inv-donut-legend').innerHTML = segs.map(s=>
+    `<div class="dleg-item"><div class="dleg-dot" style="background:${s.color}"></div>${s.label} · ${s.value}</div>`
+  ).join('');
+}
+
+function autofillFromModel(prefix){
+  const model = document.getElementById(prefix+'-mod').value.trim();
+  const info = modelLookup()[model];
+  const prodEl = document.getElementById(prefix+'-prod');
+  if(prodEl) prodEl.value = info ? (info.product||'') : '';
+  if(prefix==='s') calcGP();
 }
 
 // ---------- Sales ----------
 function calcGP(){
-  const a=n(document.getElementById('s-amt').value);
-  const c=n(document.getElementById('s-cost').value);
-  const gp=a-c,pct=a?(gp/a*100):0;
+  const model = document.getElementById('s-mod').value.trim();
+  const qty = n(document.getElementById('s-qty').value)||1;
+  const amtPerUnit = n(document.getElementById('s-amt').value);
+  const inv = computeInventory().find(x=>x.model===model);
+  const costPerUnit = inv ? inv.avgCost : 0;
+  document.getElementById('s-cost').value = costPerUnit ? fmt(costPerUnit) : '';
+  const totalSale = amtPerUnit*qty, totalCost = costPerUnit*qty;
+  const gp=totalSale-totalCost, pct=totalSale?(gp/totalSale*100):0;
   const el=document.getElementById('s-gp');
-  el.value=a||c?'EGP '+fmt(gp)+' ('+pct.toFixed(1)+'%)':'';
+  el.value=totalSale?'EGP '+fmt(gp)+' ('+pct.toFixed(1)+'%)':'';
   el.style.color=gp>0?'var(--green)':gp<0?'var(--red)':'var(--text2)';
 }
+
+function aggregateSales(){
+  let revenue=0, cogs=0;
+  const byModel = {}, byPlatform = {};
+  const invList = computeInventory();
+  SALES_TRANSACTIONS.forEach(s=>{
+    const total = s.qty*s.saleAmount;
+    const inv = invList.find(x=>x.model===s.model);
+    const unitCost = inv ? inv.avgCost : 0;
+    const cost = unitCost*s.qty;
+    revenue += total; cogs += cost;
+    byModel[s.model] = byModel[s.model]||{revenue:0,cogs:0};
+    byModel[s.model].revenue += total; byModel[s.model].cogs += cost;
+    byPlatform[s.platform] = (byPlatform[s.platform]||0) + total;
+  });
+  return {revenue, cogs, gp: revenue-cogs, gpPct: revenue?((revenue-cogs)/revenue*100):0, byModel, byPlatform, count: SALES_TRANSACTIONS.length};
+}
+
+function renderSalesAll(){
+  const agg = aggregateSales();
+  const invList = computeInventory();
+  const sorted = [...SALES_TRANSACTIONS].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  const platformColors = {};
+  const palette = ['var(--amber)','var(--blue)','var(--green)','var(--purple)','var(--red)','var(--text2)'];
+  [...new Set(SALES_TRANSACTIONS.map(s=>s.platform))].forEach((p,i)=>platformColors[p]=palette[i%palette.length]);
+
+  const rowsHtml = sorted.map(s=>{
+    const total = s.qty*s.saleAmount;
+    const inv = invList.find(x=>x.model===s.model);
+    const unitCost = inv ? inv.avgCost : 0;
+    const cost = unitCost*s.qty;
+    const gp = total-cost, pct = total?(gp/total*100):0;
+    const statusPill = s.status==='Paid'?'p-green':s.status==='Pending'?'p-amber':'p-blue';
+    const color = platformColors[s.platform]||'var(--text2)';
+    return `<tr><td style="color:var(--text2);font-size:.7rem">${fmtDateISO(s.date)}</td><td><span class="badge" style="background:rgba(0,0,0,.06);color:${color}">${s.platform}</span></td><td class="mono">${s.model}</td><td class="rtl">${inv?inv.product:''}</td><td class="mono">${s.orderNo||'—'}</td><td class="mono">${s.qty}</td><td class="amt">${fmt(total)}</td><td class="amt">${fmt(cost)}</td><td class="amt" style="color:${gp>=0?'var(--green)':'var(--red)'}">${fmt(gp)}</td><td class="mono" style="color:${gp>=0?'var(--green)':'var(--red)'}">${pct.toFixed(1)}%</td><td><span class="pill ${statusPill}">${s.status}</span></td><td><button class="btn-del" onclick="deleteSaleTransaction(${s._id})" title="Delete">🗑</button></td></tr>`;
+  }).join('');
+  document.getElementById('tb-sales').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="12" style="text-align:center;color:var(--text2);padding:22px">No sales yet</td></tr>';
+
+  document.getElementById('s-kpi-revenue').textContent = fmt(agg.revenue);
+  document.getElementById('s-kpi-cogs').textContent = fmt(agg.cogs);
+  document.getElementById('s-kpi-gp').textContent = fmt(agg.gp);
+  document.getElementById('s-kpi-gp-sub').textContent = 'GP% '+agg.gpPct.toFixed(1)+'% · IFRS 15';
+  document.getElementById('s-kpi-txns').textContent = agg.count;
+  const totalQty = SALES_TRANSACTIONS.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('s-kpi-txns-sub').textContent = 'Avg order EGP '+(agg.count?fmt(agg.revenue/agg.count):'0.00');
+
+  const modelEntries = Object.entries(agg.byModel).sort((a,b)=>b[1].revenue-a[1].revenue).slice(0,8);
+  const maxRev = Math.max(...modelEntries.map(e=>e[1].revenue),1);
+  document.getElementById('s-model-chart').innerHTML = modelEntries.map(([m,v])=>
+    `<div class="prog-row"><span class="prog-label">${m}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,v.revenue/maxRev*100)}%;background:var(--green)"></div></div><span class="prog-val">${fmt(v.revenue)}</span></div>`
+  ).join('') || '<div style="color:var(--text2);font-size:.78rem">No data yet</div>';
+
+  const platEntries = Object.entries(agg.byPlatform).sort((a,b)=>b[1]-a[1]);
+  const maxPlat = Math.max(...platEntries.map(e=>e[1]),1);
+  document.getElementById('s-platform-chart').innerHTML = platEntries.map(([p,v])=>
+    `<div class="prog-row"><span class="prog-label">${p}</span><div class="prog-track"><div class="prog-fill" style="width:${Math.max(4,v/maxPlat*100)}%;background:${platformColors[p]||'var(--blue)'}"></div></div><span class="prog-val">${fmt(v)}</span></div>`
+  ).join('') || '<div style="color:var(--text2);font-size:.78rem">No data yet</div>';
+
+  const platforms = [...new Set(SALES_TRANSACTIONS.map(s=>s.platform))].sort();
+  const chSel = document.getElementById('s-filter-channel');
+  const chPrev = chSel.value;
+  chSel.innerHTML = '<option>All Platforms</option>'+platforms.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(platforms.includes(chPrev)) chSel.value = chPrev;
+
+  document.getElementById('s-sub').textContent = agg.count+' transactions';
+  renderInventoryAll();
+  renderArAll();
+}
+
+function deleteSaleTransaction(id){
+  const idx = SALES_TRANSACTIONS.findIndex(s=>s._id===id);
+  if(idx===-1) return;
+  const s = SALES_TRANSACTIONS[idx];
+  if(!confirm('Delete this sale?\n'+s.platform+' · '+s.model+' · Qty '+s.qty+'\nThis also removes the linked AR invoice.')) return;
+  SALES_TRANSACTIONS.splice(idx,1);
+  renderSalesAll();
+  toast('Sale deleted — Inventory and AR updated','ok');
+}
+
 function saveSale(){
-  const amt=n(document.getElementById('s-amt').value),cost=n(document.getElementById('s-cost').value);
-  if(!amt){toast('Sale amount is required','err');return;}
-  const ch=document.getElementById('s-ch').value;
-  const model=document.getElementById('s-mod').value.trim()||'—';
-  const prod=document.getElementById('s-prod').value.trim();
-  const brand=document.getElementById('s-brand').value.trim()||'—';
+  const model=document.getElementById('s-mod').value.trim();
+  const amtPerUnit=n(document.getElementById('s-amt').value);
+  if(!amtPerUnit||!model){toast('Model and sale amount are required','err');return;}
+  const date=document.getElementById('s-date').value || new Date().toISOString().split('T')[0];
+  const platform=document.getElementById('s-ch').value.trim()||'—';
+  const orderNo=document.getElementById('s-ord').value.trim();
   const qty=n(document.getElementById('s-qty').value)||1;
   const status=document.getElementById('s-pay').value;
-  const gp=amt-cost,pct=amt?(gp/amt*100):0;
-  const statusPill=status==='Paid'?'p-green':status==='Pending'?'p-amber':'p-blue';
-  const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
-  const c=chColors[ch]||['139,148,158','var(--text2)'];
-  prependRow('tb-sales','<tr><td style="color:var(--text2);font-size:.7rem">'+todayStr()+'</td><td><span class="badge" style="background:rgba('+c[0]+',.12);color:'+c[1]+'">'+ch+'</span></td><td class="mono">'+model+'</td><td class="rtl">'+prod+'</td><td>'+brand+'</td><td class="mono">'+qty+'</td><td class="amt">'+fmt(amt)+'</td><td class="amt">'+fmt(cost)+'</td><td class="amt" style="color:'+(gp>=0?'var(--green)':'var(--red)')+'">'+fmt(gp)+'</td><td class="mono" style="color:'+(gp>=0?'var(--green)':'var(--red)')+'">'+pct.toFixed(1)+'%</td><td><span class="pill '+statusPill+'">'+status+'</span></td></tr>');
-  resetForm(['s-mod','s-prod','s-brand','s-ord','s-qty','s-amt','s-cost','s-gp']);
+  SALES_TRANSACTIONS.push({date, platform, model, orderNo, qty, saleAmount:amtPerUnit, status, _id:_salesNextId++});
+  renderSalesAll();
+  resetForm(['s-mod','s-prod','s-ord','s-qty','s-amt','s-cost','s-gp']);
   document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
-  toast('Sale logged','ok');
+  toast('Sale logged — Inventory deducted, AR invoice created','ok');
 }
 
 // ---------- AP ----------
@@ -1069,27 +1305,101 @@ function saveAP(){
   toast('AP transaction saved — reflected in Summary, Log & Ledger','ok');
 }
 
-// ---------- AR ----------
-function calcAR(){
-  const inv=n(document.getElementById('ar-inv').value);
-  const comm=n(document.getElementById('ar-comm').value);
-  const net=inv*(1-comm/100);
-  document.getElementById('ar-net').value=inv?fmt(net):'';
+// ---------- AR (derived from Sales: Dr AR / Cr Sales Revenue, partner = Platform) ----------
+function arBucketInfo(days){
+  if(days<=30) return ['0-30d','p-green','Current'];
+  if(days<=60) return ['31-60d','p-amber','Due'];
+  if(days<=90) return ['61-90d','p-red','Overdue'];
+  return ['>90d','p-red','Critical'];
 }
+
+function aggregateAR(){
+  const now = new Date();
+  const invoiceEntries = SALES_TRANSACTIONS.map(s=>({
+    date:s.date, partner:s.platform, type:'Sales Invoice', ref:String(s.orderNo||''),
+    amount: s.qty*s.saleAmount, _source:'sale', _saleId:s._id,
+  }));
+  const manualEntries = AR_MANUAL_ENTRIES.map(m=>({
+    date:m.date, partner:m.partner, type:m.type, ref:m.ref,
+    amount: -Math.abs(m.amount), _source:'manual', _id:m._id, notes:m.notes,
+  }));
+  const all = [...invoiceEntries, ...manualEntries];
+  const totalInvoiced = invoiceEntries.reduce((s,x)=>s+x.amount,0);
+  const totalCollected = manualEntries.reduce((s,x)=>s+Math.abs(x.amount),0);
+  const outstanding = totalInvoiced - totalCollected;
+  const buckets = {c:0,d:0,o:0,cr:0};
+  let overdueAmt = 0;
+  invoiceEntries.forEach(e=>{
+    const days = Math.floor((now - new Date(e.date))/86400000);
+    if(days<=30) buckets.c += e.amount;
+    else if(days<=60) buckets.d += e.amount;
+    else if(days<=90) { buckets.o += e.amount; overdueAmt += e.amount; }
+    else { buckets.cr += e.amount; overdueAmt += e.amount; }
+  });
+  const maxBucket = Math.max(buckets.c,buckets.d,buckets.o,buckets.cr,1);
+  return {all, totalInvoiced, totalCollected, outstanding, buckets, maxBucket, overdueAmt};
+}
+
+function renderArAll(){
+  const agg = aggregateAR();
+  const now = new Date();
+  const sorted = [...agg.all].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  const rowsHtml = sorted.map(e=>{
+    const days = Math.floor((now - new Date(e.date))/86400000);
+    const isInvoice = e._source==='sale';
+    const [ageLabel,agePill,ageStatus] = isInvoice ? arBucketInfo(days) : ['—','p-blue','Collected'];
+    const amtColor = e.amount>=0 ? 'var(--blue)' : 'var(--green)';
+    const delBtn = isInvoice
+      ? `<span style="color:var(--text3);font-size:.78rem" title="Delete the linked sale in Sales Register">—</span>`
+      : `<button class="btn-del" onclick="deleteArManualEntry(${e._id})" title="Delete">🗑</button>`;
+    return `<tr><td style="color:var(--text2);font-size:.7rem">${fmtDateISO(e.date)}</td><td>${e.partner}</td><td>${e.type}</td><td class="mono">${e.ref||'—'}</td><td class="amt" style="color:${amtColor}">${fmt(e.amount)}</td><td>${isInvoice?`<span class="pill ${agePill}">${ageLabel}</span>`:'—'}</td><td><span class="pill ${agePill}">${ageStatus}</span></td><td>${delBtn}</td></tr>`;
+  }).join('');
+  document.getElementById('tb-ar').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="8" style="text-align:center;color:var(--text2);padding:22px">No AR entries yet — log a sale to create one</td></tr>';
+
+  document.getElementById('ar-kpi-outstanding').textContent = fmt(agg.outstanding);
+  document.getElementById('ar-kpi-collected').textContent = fmt(agg.totalCollected);
+  document.getElementById('ar-kpi-invoiced').textContent = fmt(agg.totalInvoiced);
+  document.getElementById('ar-kpi-invoiced-sub').textContent = SALES_TRANSACTIONS.length+' invoices from Sales';
+  document.getElementById('ar-kpi-overdue').textContent = fmt(agg.overdueAmt);
+
+  document.getElementById('ar-age-current').textContent = 'EGP '+fmt(agg.buckets.c);
+  document.getElementById('ar-age-current-bar').style.width = Math.max(agg.buckets.c?4:0,agg.buckets.c/agg.maxBucket*100)+'%';
+  document.getElementById('ar-age-due').textContent = 'EGP '+fmt(agg.buckets.d);
+  document.getElementById('ar-age-due-bar').style.width = Math.max(agg.buckets.d?4:0,agg.buckets.d/agg.maxBucket*100)+'%';
+  document.getElementById('ar-age-overdue').textContent = 'EGP '+fmt(agg.buckets.o);
+  document.getElementById('ar-age-overdue-bar').style.width = Math.max(agg.buckets.o?4:0,agg.buckets.o/agg.maxBucket*100)+'%';
+  document.getElementById('ar-age-critical').textContent = 'EGP '+fmt(agg.buckets.cr);
+  document.getElementById('ar-age-critical-bar').style.width = Math.max(agg.buckets.cr?4:0,agg.buckets.cr/agg.maxBucket*100)+'%';
+
+  const platforms = [...new Set(SALES_TRANSACTIONS.map(s=>s.platform))].sort();
+  const platSel = document.getElementById('ar-filter-platform');
+  const platPrev = platSel.value;
+  platSel.innerHTML = '<option>All Platforms</option>'+platforms.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(platforms.includes(platPrev)) platSel.value = platPrev;
+
+  document.getElementById('ar-sub').textContent = agg.all.length+' entries';
+}
+
+function deleteArManualEntry(id){
+  const idx = AR_MANUAL_ENTRIES.findIndex(m=>m._id===id);
+  if(idx===-1) return;
+  if(!confirm('Delete this AR receipt/credit note entry?')) return;
+  AR_MANUAL_ENTRIES.splice(idx,1);
+  renderArAll();
+  toast('Entry deleted','ok');
+}
+
 function saveAR(){
-  const inv=n(document.getElementById('ar-inv').value);
-  if(!inv){toast('Invoice amount is required','err');return;}
-  const ch=document.getElementById('ar-cust').value;
+  const amount=n(document.getElementById('ar-inv').value);
+  const partner=document.getElementById('ar-cust').value.trim();
+  if(!amount||!partner){toast('Partner and amount are required','err');return;}
+  const date=document.getElementById('ar-date').value || new Date().toISOString().split('T')[0];
   const type=document.getElementById('ar-type').value;
-  const ref=document.getElementById('ar-ref').value.trim()||'—';
-  const comm=n(document.getElementById('ar-comm').value);
-  const net=inv*(1-comm/100);
-  const status=document.getElementById('ar-status').value;
-  const statusPill=status==='Received'?'p-green':status==='Pending'?'p-amber':'p-blue';
-  const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
-  const c=chColors[ch]||['139,148,158','var(--text2)'];
-  prependRow('tb-ar','<tr><td style="color:var(--text2);font-size:.7rem">'+todayStr()+'</td><td><span class="badge" style="background:rgba('+c[0]+',.12);color:'+c[1]+'">'+ch+'</span></td><td>'+type+'</td><td class="mono">'+ref+'</td><td class="amt">'+fmt(inv)+'</td><td class="mono">'+comm.toFixed(1)+'%</td><td class="amt" style="color:var(--blue)">'+fmt(net)+'</td><td style="color:var(--text2);font-size:.7rem">—</td><td><span class="pill '+statusPill+'">'+status+'</span></td></tr>');
-  resetForm(['ar-ref','ar-inv','ar-comm','ar-net']);
+  const ref=document.getElementById('ar-ref').value.trim();
+  const notes=document.getElementById('ar-notes').value.trim();
+  AR_MANUAL_ENTRIES.push({date, partner, type, ref, amount, notes, _id:_arNextId++});
+  renderArAll();
+  resetForm(['ar-cust','ar-ref','ar-inv','ar-notes']);
   document.getElementById('ar-date').value=new Date().toISOString().split('T')[0];
   toast('AR entry saved','ok');
 }
@@ -1112,9 +1422,8 @@ function handleImportFile(event){
     try{
       const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true});
       if(target==='ap') importAP(wb);
-      else if(target==='po') importGeneric(wb,'po');
-      else if(target==='sales') importGeneric(wb,'sales');
-      else if(target==='ar') importGeneric(wb,'ar');
+      else if(target==='po') importPurchasing(wb);
+      else if(target==='sales') importSalesData(wb);
       else if(target==='exp') importGeneric(wb,'exp');
       else if(target==='inv') importInventory(wb);
       else if(target==='cash') importCash(wb);
@@ -1175,83 +1484,70 @@ function importAP(wb){
 }
 
 function importInventory(wb){
-  const sheet = findSheet(wb, ['stock','inventory','ledger']);
+  const sheet = findSheet(wb, ['inventory','stock']);
   const rows = sheetRows(sheet).filter(r=>pick(r,['Model No.','Model']));
-  const html = rows.map(r=>{
-    const model = pick(r,['Model No.','Model']);
-    const product = pick(r,['Product Name (AR)','Product']) || '';
-    const brand = pick(r,['Brand']) || '—';
-    const avgCost = Number(pick(r,['Avg Cost','Average Cost'])) || 0;
-    const rcvd = Number(pick(r,['Qty Received','Rcvd'])) || 0;
-    const sold = Number(pick(r,['Qty Sold','Sold'])) || 0;
-    const available = pick(r,['Available']) !== null ? Number(pick(r,['Available'])) : rcvd-sold;
-    const stockValue = avgCost*available;
-    const lastSale = toJsDate(pick(r,['Last Sale']));
-    let pill='p-green', label='✅ In', availColor='var(--green)';
-    if(available===0){pill='p-red';label='❌ Out';availColor='var(--text2)';}
-    else if(available<0){pill='p-red';label='❌ Neg';availColor='var(--red)';}
-    else if(available<=3){pill='p-amber';label='⚠ Low';availColor='var(--amber)';}
-    return `<tr><td class="mono">${model}</td><td class="rtl">${product}</td><td>${brand}</td><td class="amt">${fmt(avgCost)}</td><td class="mono">${rcvd}</td><td class="mono">${sold}</td><td class="mono" style="color:${availColor}">${available}</td><td class="amt" style="color:${stockValue<0?'var(--red)':''}">${fmt(stockValue)}</td><td><span class="pill ${pill}">${label}</span></td><td style="color:var(--text2);font-size:.7rem">${lastSale?todayStrFromDate(lastSale):'—'}</td></tr>`;
-  }).join('');
-  if(html) document.getElementById('tb-inv').innerHTML = html;
-  toast('Imported '+rows.length+' SKUs into Inventory','ok');
+  const parsed = rows.map(r=>({
+    model: pick(r,['Model No.','Model']),
+    product: pick(r,['Produ name','Product Name (AR)','Product']) || '',
+    openingQty: Number(pick(r,['Avilabl Stcok','Available Stock','Opening Qty','Available'])) || 0,
+    unitCost: Number(pick(r,['Unit Cost (EGP)','Unit Cost','Avg Cost'])) || 0,
+  }));
+  INVENTORY_OPENING.length = 0;
+  INVENTORY_OPENING.push(...parsed);
+  renderInventoryAll();
+  toast('Set opening balance for '+parsed.length+' SKUs','ok');
+}
+
+function importPurchasing(wb){
+  const sheet = findSheet(wb, ['purchas']);
+  const rows = sheetRows(sheet).filter(r=>{
+    const m = pick(r,['Model No.','Model']);
+    return m && m!=='#REF!';
+  });
+  const parsed = rows.map(r=>({
+    date: (()=>{ const d=toJsDate(pick(r,['Order date','Date'])); return d?d.toISOString().split('T')[0]:''; })(),
+    supplier: pick(r,['Supplier']) || '—',
+    model: pick(r,['Model No.','Model']),
+    orderNo: pick(r,['Order Number']) || '',
+    qty: Number(pick(r,['QTY Ordered','Qty Ordered','Qty'])) || 0,
+    unitCost: Number(pick(r,['Unit Cost (EGP)','Unit Cost'])) || 0,
+    method: pick(r,['Pay Method','Method']) || 'N/A',
+    paid: Number(pick(r,['Amount Paid','Paid'])) || 0,
+  }));
+  parsed.forEach((p,i)=>p._id=i);
+  _poNextId = parsed.length;
+  PURCHASE_ORDERS.length = 0;
+  PURCHASE_ORDERS.push(...parsed);
+  renderPurchasingAll();
+  toast('Imported '+parsed.length+' purchase orders — Inventory updated','ok');
+}
+
+function importSalesData(wb){
+  const sheet = findSheet(wb, ['sales']);
+  const rows = sheetRows(sheet).filter(r=>{
+    const m = pick(r,['Model No.','Model']);
+    return m && m!=='TOTAL';
+  });
+  const parsed = rows.map(r=>({
+    date: (()=>{ const d=toJsDate(pick(r,['Date'])); return d?d.toISOString().split('T')[0]:''; })(),
+    platform: pick(r,['Platform','Channel']) || '—',
+    model: pick(r,['Model No.','Model']),
+    orderNo: pick(r,['Order Number']) || '',
+    qty: Number(pick(r,['QTY Sold','Qty Sold','Qty'])) || 1,
+    saleAmount: Number(pick(r,['Sale amount','Sale Amount'])) || 0,
+    status: pick(r,['Payment Status','Status']) || 'Pending',
+  }));
+  parsed.forEach((s,i)=>s._id=i);
+  _salesNextId = parsed.length;
+  SALES_TRANSACTIONS.length = 0;
+  SALES_TRANSACTIONS.push(...parsed);
+  renderSalesAll();
+  toast('Imported '+parsed.length+' sales — Inventory deducted, AR updated','ok');
 }
 
 function todayStrFromDate(d){ return d.toLocaleDateString('en-GB'); }
 
 const IMPORT_MAPS = {
-  po: {
-    tbody:'tb-po',
-    build: r=>{
-      const date = toJsDate(pick(r,['Date'])) || new Date();
-      const sup = pick(r,['Supplier']) || '—';
-      const model = pick(r,['Model No.','Model']) || '—';
-      const prod = pick(r,['Product Name (AR)','Product']) || '';
-      const qty = Number(pick(r,['Qty Ordered','Qty'])) || 0;
-      const unit = Number(pick(r,['Unit Cost (EGP)','Unit Cost'])) || 0;
-      const method = pick(r,['Pay Method','Method']) || 'Cash';
-      const paid = Number(pick(r,['Amount Paid','Paid'])) || 0;
-      const total = qty*unit, bal = total-paid;
-      const methodPill = method==='Cash'?'p-green':method==='Payment Terms'?'p-amber':'p-blue';
-      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td style="font-weight:500">${sup}</td><td class="mono">${model}</td><td class="rtl">${prod}</td><td class="mono">${qty}</td><td class="amt">${fmt(unit)}</td><td class="amt">${fmt(total)}</td><td><span class="pill ${methodPill}">${method}</span></td><td class="amt">${fmt(paid)}</td><td class="amt" style="color:${bal>0?'var(--red)':'var(--green)'}">${fmt(bal)}</td></tr>`;
-    }
-  },
-  sales: {
-    tbody:'tb-sales',
-    build: r=>{
-      const date = toJsDate(pick(r,['Sale Date','Date'])) || new Date();
-      const ch = pick(r,['Channel']) || 'In Store';
-      const model = pick(r,['Model No.','Model']) || '—';
-      const prod = pick(r,['Product Name (AR)','Product']) || '';
-      const brand = pick(r,['Brand']) || '—';
-      const qty = Number(pick(r,['Qty Sold','Qty'])) || 1;
-      const amt = Number(pick(r,['Sale Amount (EGP)','Sale Amount'])) || 0;
-      const cost = Number(pick(r,['Cost Amount (EGP)','Cost Amount'])) || 0;
-      const status = pick(r,['Payment Status','Status']) || 'Paid';
-      const gp = amt-cost, pct = amt?(gp/amt*100):0;
-      const statusPill = status==='Paid'?'p-green':status==='Pending'?'p-amber':'p-blue';
-      const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
-      const c = chColors[ch] || ['139,148,158','var(--text2)'];
-      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td class="mono">${model}</td><td class="rtl">${prod}</td><td>${brand}</td><td class="mono">${qty}</td><td class="amt">${fmt(amt)}</td><td class="amt">${fmt(cost)}</td><td class="amt" style="color:${gp>=0?'var(--green)':'var(--red)'}">${fmt(gp)}</td><td class="mono" style="color:${gp>=0?'var(--green)':'var(--red)'}">${pct.toFixed(1)}%</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
-    }
-  },
-  ar: {
-    tbody:'tb-ar',
-    build: r=>{
-      const date = toJsDate(pick(r,['Date'])) || new Date();
-      const ch = pick(r,['Customer / Channel','Channel']) || 'Jumia';
-      const type = pick(r,['Transaction Type','Type']) || 'Sales Invoice';
-      const ref = pick(r,['Invoice / Ref #','Ref']) || '—';
-      const inv = Number(pick(r,['Invoice Amount (EGP)','Invoice Amount'])) || 0;
-      const comm = Number(pick(r,['Commission %','Commission'])) || 0;
-      const net = inv*(1-comm/100);
-      const status = pick(r,['Payment Status','Status']) || 'Pending';
-      const statusPill = status==='Received'?'p-green':status==='Pending'?'p-amber':'p-blue';
-      const chColors={'Jumia':['232,160,32','var(--amber)'],'Noon':['88,166,255','var(--blue)'],'B Tech':['63,185,80','var(--green)'],'Raneen':['188,140,255','var(--purple)'],'Raya':['248,81,73','var(--red)'],'In Store':['139,148,158','var(--text2)']};
-      const c = chColors[ch] || ['139,148,158','var(--text2)'];
-      return `<tr><td style="color:var(--text2);font-size:.7rem">${todayStrFromDate(date)}</td><td><span class="badge" style="background:rgba(${c[0]},.12);color:${c[1]}">${ch}</span></td><td>${type}</td><td class="mono">${ref}</td><td class="amt">${fmt(inv)}</td><td class="mono">${comm.toFixed(1)}%</td><td class="amt" style="color:var(--blue)">${fmt(net)}</td><td style="color:var(--text2);font-size:.7rem">—</td><td><span class="pill ${statusPill}">${status}</span></td></tr>`;
-    }
-  },
   exp: {
     tbody:'tb-exp',
     build: r=>{
