@@ -1753,10 +1753,12 @@ function setReturnType(dir){
   document.getElementById('ret-direction').value = dir;
   const isCust = dir==='customer';
   // toggle buttons style
-  document.getElementById('ret-type-customer').className = isCust ? 'btn-save' : 'btn-s';
-  document.getElementById('ret-type-customer').style.background = isCust ? 'var(--accent)' : '';
-  document.getElementById('ret-type-vendor').className = isCust ? 'btn-s' : 'btn-save';
-  document.getElementById('ret-type-vendor').style.background = isCust ? '' : 'var(--purple)';
+  document.getElementById('ret-type-customer').className = 'btn-save';
+  document.getElementById('ret-type-customer').style.background = isCust ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('ret-type-customer').style.color = isCust ? '' : 'var(--text2)';
+  document.getElementById('ret-type-vendor').className = 'btn-save';
+  document.getElementById('ret-type-vendor').style.background = isCust ? 'var(--surface2)' : 'var(--purple)';
+  document.getElementById('ret-type-vendor').style.color = isCust ? 'var(--text2)' : '';
   // show/hide fields
   document.getElementById('ret-fg-company').style.display = isCust ? '' : 'none';
   document.getElementById('ret-fg-vendor').style.display  = isCust ? 'none' : '';
