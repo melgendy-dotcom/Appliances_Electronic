@@ -794,8 +794,9 @@ function refreshVendorDropdown(){
   renderVendorLedger(selected);
 }
 
-// ---------- AP unified aggregation (single source of truth: AP_TRANSACTIONS) ----------
+// ---------- AP unified aggregation (AP_TRANSACTIONS + LOCAL_AP_RETURNS always merged) ----------
 function aggregateAP(transactions){
+  transactions = [...transactions, ...LOCAL_AP_RETURNS];
   const vendors = {};
   let juneBills=0, juneBillCount=0, junePayments=0;
   const now = new Date();
@@ -1116,6 +1117,8 @@ let _arNextId = 0;
 
 const RETURNS_TRANSACTIONS = [];
 let _retNextId = 0;
+// Vendor return AP credits — kept separate so Google Sheets sync never wipes them
+const LOCAL_AP_RETURNS = [];
 
 function modelLookup(){
   const map = {};
@@ -1897,7 +1900,7 @@ function saveReturn(){
     const apAmount = qty * unitCost;
     const ref = 'RET-'+String(_retNextId+1).padStart(4,'0');
     // Create AP Credit Note entry (reduces vendor balance)
-    AP_TRANSACTIONS.push({date, vendor, type:'Return', ref, bill:0, payment:apAmount, notes:'Purchase Return — '+model+' × '+qty+' units'+(notes?' | '+notes:''), _id:_apNextId++});
+    LOCAL_AP_RETURNS.push({date, vendor, type:'Return', ref, bill:0, payment:apAmount, notes:'Purchase Return — '+model+' × '+qty+' units'+(notes?' | '+notes:''), _id:'RET-'+_retNextId});
     // Save return record (vendor return reduces inventory)
     const entry = {_id:_retNextId++, date, direction:'vendor', vendor, model, product:inv?inv.product:'', qty, condition:'Vendor Return', apAmount, notes, ref};
     RETURNS_TRANSACTIONS.push(entry);
@@ -1941,10 +1944,11 @@ function deleteReturn(id){
   const idx = RETURNS_TRANSACTIONS.findIndex(r=>r._id===id);
   if(idx===-1) return;
   const r = RETURNS_TRANSACTIONS[idx];
-  // If vendor return, also remove the linked AP Credit Note
+  // If vendor return, also remove from LOCAL_AP_RETURNS (sync-safe separate array)
   if(r.direction==='vendor' && r.ref){
-    const apIdx = AP_TRANSACTIONS.findIndex(t=>t.ref===r.ref && (t.type==='Return'||t.type==='Credit Note'));
-    if(apIdx!==-1){ AP_TRANSACTIONS.splice(apIdx,1); renderApAll(); }
+    const apIdx = LOCAL_AP_RETURNS.findIndex(t=>t.ref===r.ref);
+    if(apIdx!==-1) LOCAL_AP_RETURNS.splice(apIdx,1);
+    renderApAll();
   }
   RETURNS_TRANSACTIONS.splice(idx,1);
   renderReturnsAll();
@@ -2189,12 +2193,10 @@ function loadApFromSheet(){
       payment: Number(r['Payment Amount (EGP)'])||0,
       notes: r['Notes']||'',
     }));
-    // Preserve locally-added Return entries (from Returns tab) before overwriting with Sheet data
-    const localReturns = AP_TRANSACTIONS.filter(t=>t.type==='Return' && t.ref && t.ref.startsWith('RET-'));
     parsed.forEach((t,i)=>t._id=i);
-    _apNextId = parsed.length + localReturns.length;
+    _apNextId = parsed.length;
     AP_TRANSACTIONS.length = 0;
-    AP_TRANSACTIONS.push(...parsed, ...localReturns);
+    AP_TRANSACTIONS.push(...parsed);
     renderApAll();
     markSynced();
   }, markSyncFailed);
