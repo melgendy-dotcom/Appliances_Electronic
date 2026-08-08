@@ -550,36 +550,55 @@ body.locked>*:not(#authGate){display:none}
 <div class="mod-panel" id="mod-returns">
 <div class="mod-wrap">
   <div class="kpi-grid">
-    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🔄</div><div class="kpi-label">Total Returns</div><div class="kpi-value" style="color:var(--blue)" id="ret-kpi-total">0</div><div class="kpi-sub" id="ret-kpi-total-sub">all conditions</div></div>
-    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">✅</div><div class="kpi-label">Good — Back to Stock</div><div class="kpi-value" style="color:var(--green)" id="ret-kpi-good">0</div><div class="kpi-sub">units added to inventory</div></div>
-    <div class="kpi-card" style="--card-accent:var(--red)"><div class="kpi-icon">❌</div><div class="kpi-label">Damaged</div><div class="kpi-value" style="color:var(--red)" id="ret-kpi-damaged">0</div><div class="kpi-sub">units written off</div></div>
-    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">💰</div><div class="kpi-label">Return Value (Cost)</div><div class="kpi-value" style="color:var(--amber)" id="ret-kpi-value">0</div><div class="kpi-sub">EGP · Good items only</div></div>
+    <div class="kpi-card" style="--card-accent:var(--blue)"><div class="kpi-icon">🔄</div><div class="kpi-label">Total Returns</div><div class="kpi-value" style="color:var(--blue)" id="ret-kpi-total">0</div><div class="kpi-sub" id="ret-kpi-total-sub">all types</div></div>
+    <div class="kpi-card" style="--card-accent:var(--green)"><div class="kpi-icon">👤→🏢</div><div class="kpi-label">Customer Returns (Good)</div><div class="kpi-value" style="color:var(--green)" id="ret-kpi-good">0</div><div class="kpi-sub">units back to stock</div></div>
+    <div class="kpi-card" style="--card-accent:var(--purple)"><div class="kpi-icon">🏢→🏭</div><div class="kpi-label">Vendor Returns</div><div class="kpi-value" style="color:var(--purple)" id="ret-kpi-vendor">0</div><div class="kpi-sub" id="ret-kpi-vendor-sub">units · AP reduced</div></div>
+    <div class="kpi-card" style="--card-accent:var(--amber)"><div class="kpi-icon">💰</div><div class="kpi-label">AP Credit Total</div><div class="kpi-value" style="color:var(--amber)" id="ret-kpi-value">0</div><div class="kpi-sub">EGP · vendor returns</div></div>
   </div>
   <div class="form-panel">
     <div class="form-title">➕ Log New Return</div>
+    <!-- Return type toggle -->
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <button id="ret-type-customer" class="btn-save" style="flex:1;background:var(--accent)" onclick="setReturnType('customer')">👤 Customer Return<br><small style="font-weight:400;opacity:.85">Customer returns item to us</small></button>
+      <button id="ret-type-vendor" class="btn-s" style="flex:1" onclick="setReturnType('vendor')">🏭 Vendor Return<br><small style="font-weight:400;opacity:.85">We return item to supplier → reduces AP</small></button>
+    </div>
+    <input type="hidden" id="ret-direction" value="customer"/>
     <div class="form-grid">
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="ret-date"/></div>
-      <div class="fg"><label class="fl">Company / Platform</label><select class="fs" id="ret-company"><option value="">— Select Company —</option><option>1. Raya</option><option>2. Noon</option><option>3. Amazon</option><option>4. Jumia</option><option>5. B.Tech</option><option>6. Raneen</option><option>7. Kenzz</option><option>Other</option></select></div>
+      <!-- Customer Return fields -->
+      <div class="fg" id="ret-fg-company"><label class="fl">Company / Platform</label><select class="fs" id="ret-company"><option value="">— Select Company —</option><option>1. Raya</option><option>2. Noon</option><option>3. Amazon</option><option>4. Jumia</option><option>5. B.Tech</option><option>6. Raneen</option><option>7. Kenzz</option><option>Other</option></select></div>
+      <!-- Vendor Return fields -->
+      <div class="fg" id="ret-fg-vendor" style="display:none"><label class="fl">Vendor (Supplier)</label><select class="fs" id="ret-vendor"><option value="">— Select Vendor —</option></select></div>
       <div class="fg"><label class="fl">Model Number</label><select class="fs" id="ret-model" onchange="autoFillRetProduct()"><option value="">— Select Model —</option></select></div>
       <div class="fg"><label class="fl">Product Name</label><input class="fi" type="text" id="ret-product" placeholder="Auto-filled from model" readonly style="background:var(--surface2);color:var(--text2)"/></div>
-      <div class="fg"><label class="fl">Qty</label><input class="fi" type="number" id="ret-qty" min="1" value="1" placeholder="1"/></div>
-      <div class="fg"><label class="fl">Condition</label><select class="fs" id="ret-condition" onchange="toggleReturnCondition()"><option value="Good">✅ Good — Return to Stock</option><option value="Damaged">❌ Damaged — Write Off</option></select></div>
+      <div class="fg"><label class="fl">Qty</label><input class="fi" type="number" id="ret-qty" min="1" value="1" placeholder="1" oninput="updateReturnApPreview()"/></div>
+      <!-- Condition — only for customer returns -->
+      <div class="fg" id="ret-fg-condition"><label class="fl">Condition</label><select class="fs" id="ret-condition" onchange="toggleReturnCondition()"><option value="Good">✅ Good — Return to Stock</option><option value="Damaged">❌ Damaged — Write Off</option></select></div>
       <div class="fg" id="ret-reason-group"><label class="fl">Reason for Return</label><select class="fs" id="ret-reason"><option>Customer Changed Mind</option><option>Wrong Item Delivered</option><option>Item Not as Described</option><option>Defective / Not Working</option><option>Damaged in Transit</option><option>Duplicate Order</option><option>Other</option></select></div>
       <div class="fg"><label class="fl">Notes</label><input class="fi" type="text" id="ret-notes" placeholder="Optional notes…"/></div>
     </div>
+    <!-- Warning banners -->
     <div id="ret-stock-warning" style="display:none;margin:8px 0;padding:10px 14px;background:#fff3cd;border:1px solid var(--amber);border-radius:8px;color:var(--amber);font-size:.82rem">⚠ This item is <strong>Damaged</strong> — it will NOT be added back to inventory.</div>
+    <!-- AP Journal Preview for Vendor Return -->
+    <div id="ret-ap-preview" style="display:none;margin:12px 0 8px">
+      <div style="font-size:.78rem;font-weight:600;color:var(--text2);margin-bottom:6px">📋 Journal Entry Preview</div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem">
+        <thead><tr style="background:var(--surface2)"><th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)">Account</th><th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)">Partner</th><th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--red)">Debit</th><th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--green)">Credit</th></tr></thead>
+        <tbody id="ret-ap-preview-body"></tbody>
+      </table></div>
+    </div>
     <button class="btn-save" onclick="saveReturn()">✓ Save Return</button>
   </div>
   <div class="tbl-card">
     <div class="tbl-toolbar">
       <div class="tbl-title">Returns Register</div>
-      <input class="search-inp" type="text" id="ret-search" placeholder="🔍 Search model, company…" oninput="renderReturnsTable()"/>
-      <select class="fsel" id="ret-filter-company" onchange="renderReturnsTable()"><option value="">All Companies</option><option>1. Raya</option><option>2. Noon</option><option>3. Amazon</option><option>4. Jumia</option><option>5. B.Tech</option><option>6. Raneen</option><option>7. Kenzz</option><option>Other</option></select>
+      <input class="search-inp" type="text" id="ret-search" placeholder="🔍 Search model, vendor, company…" oninput="renderReturnsTable()"/>
+      <select class="fsel" id="ret-filter-dir" onchange="renderReturnsTable()"><option value="">All Types</option><option value="customer">Customer Return</option><option value="vendor">Vendor Return</option></select>
       <select class="fsel" id="ret-filter-cond" onchange="renderReturnsTable()"><option value="">All Conditions</option><option value="Good">Good</option><option value="Damaged">Damaged</option></select>
       <span class="tbl-sub" id="ret-sub">0 entries</span>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Company</th><th>Model</th><th>Product</th><th>Qty</th><th>Condition</th><th>Reason</th><th>Notes</th><th>Action</th></tr></thead>
+      <thead><tr><th>Date</th><th>Type</th><th>Company / Vendor</th><th>Model</th><th>Product</th><th>Qty</th><th>Condition</th><th>AP Impact</th><th>Reason / Notes</th><th>Action</th></tr></thead>
       <tbody id="tb-ret"></tbody>
     </table></div>
   </div>
@@ -1215,15 +1234,17 @@ function computeInventory(){
     if(!isNaN(d) && (!models[s.model].lastSale || d>models[s.model].lastSale)) models[s.model].lastSale = d;
   });
   RETURNS_TRANSACTIONS.forEach(r=>{
-    if(!models[r.model]) models[r.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, returned:0, lastSale:null};
-    if(r.condition==='Good') models[r.model].returned = (models[r.model].returned||0) + r.qty;
+    if(!models[r.model]) models[r.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, returned:0, vendorReturned:0, lastSale:null};
+    if(r.direction==='customer' && r.condition==='Good') models[r.model].returned = (models[r.model].returned||0) + r.qty;
+    if(r.direction==='vendor') models[r.model].vendorReturned = (models[r.model].vendorReturned||0) + r.qty;
   });
   return Object.entries(models).map(([model,m])=>{
     const totalQtyForWAC = m.openingQty + m.rcvd;
     const wac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue) / totalQtyForWAC : m.openingCost;
     const returned = m.returned||0;
-    const available = m.openingQty + m.rcvd + returned - m.sold;
-    return {model, product:m.product, avgCost:wac, opening:m.openingQty, rcvd:m.rcvd, sold:m.sold, returned, available, stockValue:wac*available, lastSale:m.lastSale};
+    const vendorReturned = m.vendorReturned||0;
+    const available = m.openingQty + m.rcvd + returned - m.sold - vendorReturned;
+    return {model, product:m.product, avgCost:wac, opening:m.openingQty, rcvd:m.rcvd, sold:m.sold, returned, vendorReturned, available, stockValue:wac*available, lastSale:m.lastSale};
   }).sort((a,b)=>b.stockValue-a.stockValue);
 }
 
@@ -1722,6 +1743,25 @@ function saveExpense(){
 }
 
 // ---------- Returns ----------
+function setReturnType(dir){
+  document.getElementById('ret-direction').value = dir;
+  const isCust = dir==='customer';
+  // toggle buttons style
+  document.getElementById('ret-type-customer').className = isCust ? 'btn-save' : 'btn-s';
+  document.getElementById('ret-type-customer').style.background = isCust ? 'var(--accent)' : '';
+  document.getElementById('ret-type-vendor').className = isCust ? 'btn-s' : 'btn-save';
+  document.getElementById('ret-type-vendor').style.background = isCust ? '' : 'var(--purple)';
+  // show/hide fields
+  document.getElementById('ret-fg-company').style.display = isCust ? '' : 'none';
+  document.getElementById('ret-fg-vendor').style.display  = isCust ? 'none' : '';
+  document.getElementById('ret-fg-condition').style.display = isCust ? '' : 'none';
+  document.getElementById('ret-reason-group').style.display = isCust ? '' : 'none';
+  document.getElementById('ret-stock-warning').style.display = 'none';
+  // AP preview only for vendor returns
+  document.getElementById('ret-ap-preview').style.display = isCust ? 'none' : 'block';
+  updateReturnApPreview();
+}
+
 function populateReturnModelDropdown(){
   const sel = document.getElementById('ret-model');
   if(!sel) return;
@@ -1736,103 +1776,176 @@ function populateReturnModelDropdown(){
   if(current) sel.value = current;
 }
 
+function populateReturnVendorDropdown(){
+  const sel = document.getElementById('ret-vendor');
+  if(!sel) return;
+  const vendors = [...new Set(AP_TRANSACTIONS.map(t=>t.vendor).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">— Select Vendor —</option>';
+  vendors.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
 function autoFillRetProduct(){
   const model = document.getElementById('ret-model').value;
   const inv = INVENTORY_OPENING.find(o=>o.model===model);
   document.getElementById('ret-product').value = inv ? inv.product : '';
+  updateReturnApPreview();
 }
 
 function toggleReturnCondition(){
   const cond = document.getElementById('ret-condition').value;
-  const warn = document.getElementById('ret-stock-warning');
-  if(warn) warn.style.display = cond==='Damaged' ? 'block' : 'none';
+  document.getElementById('ret-stock-warning').style.display = cond==='Damaged' ? 'block' : 'none';
+}
+
+function updateReturnApPreview(){
+  const dir = document.getElementById('ret-direction').value;
+  const preview = document.getElementById('ret-ap-preview');
+  if(!preview) return;
+  if(dir!=='vendor'){ preview.style.display='none'; return; }
+  preview.style.display='block';
+  const model = document.getElementById('ret-model').value;
+  const qty   = parseInt(document.getElementById('ret-qty').value)||0;
+  const vendor = document.getElementById('ret-vendor').value || '—';
+  const inv = INVENTORY_OPENING.find(o=>o.model===model);
+  const unitCost = inv ? inv.unitCost : 0;
+  const total = qty * unitCost;
+  const tbody = document.getElementById('ret-ap-preview-body');
+  if(!tbody) return;
+  tbody.innerHTML = `
+    <tr><td style="padding:6px 10px;border-bottom:1px solid var(--border);font-weight:600">Accounts Payable</td><td style="padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text2)">${vendor}</td><td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:right;color:var(--red);font-family:monospace">${fmt(total)}</td><td style="padding:6px 10px;border-bottom:1px solid var(--border);text-align:right;color:var(--text3)">—</td></tr>
+    <tr><td style="padding:6px 10px;font-weight:600">Inventory</td><td style="padding:6px 10px;color:var(--text2)">${model||'—'}</td><td style="padding:6px 10px;text-align:right;color:var(--text3)">—</td><td style="padding:6px 10px;text-align:right;color:var(--green);font-family:monospace">${fmt(total)}</td></tr>`;
 }
 
 function renderReturnsTable(){
   const search = (document.getElementById('ret-search')||{value:''}).value.toLowerCase();
-  const filterCo = (document.getElementById('ret-filter-company')||{value:''}).value;
+  const filterDir  = (document.getElementById('ret-filter-dir')||{value:''}).value;
   const filterCond = (document.getElementById('ret-filter-cond')||{value:''}).value;
   let list = RETURNS_TRANSACTIONS.slice().reverse();
-  if(search) list = list.filter(r=>(r.model+r.product+r.company+r.reason+r.notes).toLowerCase().includes(search));
-  if(filterCo) list = list.filter(r=>r.company===filterCo);
+  if(search) list = list.filter(r=>(r.model+(r.product||'')+(r.company||'')+(r.vendor||'')+(r.reason||'')+(r.notes||'')).toLowerCase().includes(search));
+  if(filterDir)  list = list.filter(r=>r.direction===filterDir);
   if(filterCond) list = list.filter(r=>r.condition===filterCond);
   const rows = list.map(r=>{
-    const condPill = r.condition==='Good'
-      ? '<span class="pill p-green">✅ Good</span>'
-      : '<span class="pill p-red">❌ Damaged</span>';
+    const isCust = r.direction==='customer';
+    const typePill = isCust
+      ? '<span class="pill p-blue">👤 Customer</span>'
+      : '<span class="pill p-purple">🏭 Vendor</span>';
+    const condPill = isCust
+      ? (r.condition==='Good' ? '<span class="pill p-green">✅ Good</span>' : '<span class="pill p-red">❌ Damaged</span>')
+      : '<span class="pill p-grey">→ Supplier</span>';
+    const party = isCust ? (r.company||'—') : (r.vendor||'—');
+    const apImpact = !isCust
+      ? `<span style="color:var(--purple);font-weight:600">−${fmt(r.apAmount||0)}</span>`
+      : '<span style="color:var(--text3)">—</span>';
+    const reasonNotes = isCust ? (r.reason||'—') : (r.notes||'—');
     return `<tr>
       <td style="color:var(--text2);font-size:.7rem">${r.date||'—'}</td>
-      <td><strong>${r.company||'—'}</strong></td>
+      <td>${typePill}</td>
+      <td><strong>${party}</strong></td>
       <td class="mono">${r.model}</td>
-      <td class="rtl" style="font-size:.75rem">${(r.product||'').substring(0,35)||'—'}</td>
+      <td class="rtl" style="font-size:.75rem">${(r.product||'').substring(0,30)||'—'}</td>
       <td class="mono">${r.qty}</td>
       <td>${condPill}</td>
-      <td style="color:var(--text2);font-size:.75rem">${r.reason||'—'}</td>
-      <td style="color:var(--text2);font-size:.75rem">${r.notes||'—'}</td>
+      <td>${apImpact}</td>
+      <td style="color:var(--text2);font-size:.75rem">${reasonNotes}</td>
       <td><button class="del-btn" onclick="deleteReturn(${r._id})">🗑</button></td>
     </tr>`;
   }).join('');
   const tbody = document.getElementById('tb-ret');
-  if(tbody) tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="9" style="text-align:center;color:var(--text2);padding:22px">No returns logged yet</td></tr>';
+  if(tbody) tbody.innerHTML = rows || '<tr class="empty-row"><td colspan="10" style="text-align:center;color:var(--text2);padding:22px">No returns logged yet</td></tr>';
   const sub = document.getElementById('ret-sub');
   if(sub) sub.textContent = RETURNS_TRANSACTIONS.length+' entries';
 }
 
 function renderReturnsKPIs(){
-  const total = RETURNS_TRANSACTIONS.reduce((s,r)=>s+r.qty,0);
-  const good = RETURNS_TRANSACTIONS.filter(r=>r.condition==='Good').reduce((s,r)=>s+r.qty,0);
-  const damaged = RETURNS_TRANSACTIONS.filter(r=>r.condition==='Damaged').reduce((s,r)=>s+r.qty,0);
-  const retValue = RETURNS_TRANSACTIONS.filter(r=>r.condition==='Good').reduce((s,r)=>{
-    const inv = INVENTORY_OPENING.find(o=>o.model===r.model);
-    return s + r.qty*(inv?inv.unitCost:0);
-  },0);
-  document.getElementById('ret-kpi-total').textContent = total;
+  const totalQty   = RETURNS_TRANSACTIONS.reduce((s,r)=>s+r.qty,0);
+  const goodQty    = RETURNS_TRANSACTIONS.filter(r=>r.direction==='customer'&&r.condition==='Good').reduce((s,r)=>s+r.qty,0);
+  const vendorQty  = RETURNS_TRANSACTIONS.filter(r=>r.direction==='vendor').reduce((s,r)=>s+r.qty,0);
+  const vendorTxns = RETURNS_TRANSACTIONS.filter(r=>r.direction==='vendor').length;
+  const apCredit   = RETURNS_TRANSACTIONS.filter(r=>r.direction==='vendor').reduce((s,r)=>s+(r.apAmount||0),0);
+  document.getElementById('ret-kpi-total').textContent = totalQty;
   document.getElementById('ret-kpi-total-sub').textContent = RETURNS_TRANSACTIONS.length+' transactions';
-  document.getElementById('ret-kpi-good').textContent = good;
-  document.getElementById('ret-kpi-damaged').textContent = damaged;
-  document.getElementById('ret-kpi-value').textContent = fmt(retValue);
+  document.getElementById('ret-kpi-good').textContent = goodQty;
+  document.getElementById('ret-kpi-vendor').textContent = vendorQty;
+  document.getElementById('ret-kpi-vendor-sub').textContent = vendorTxns+' transactions · AP reduced';
+  document.getElementById('ret-kpi-value').textContent = fmt(apCredit);
 }
 
 function renderReturnsAll(){
   populateReturnModelDropdown();
+  populateReturnVendorDropdown();
   renderReturnsKPIs();
   renderReturnsTable();
 }
 
 function saveReturn(){
-  const company = document.getElementById('ret-company').value;
-  const model   = document.getElementById('ret-model').value;
-  const qty     = parseInt(document.getElementById('ret-qty').value)||0;
-  const cond    = document.getElementById('ret-condition').value;
-  const reason  = document.getElementById('ret-reason').value;
-  const notes   = document.getElementById('ret-notes').value.trim();
-  const date    = document.getElementById('ret-date').value || todayStr();
-  if(!company){toast('Please select a company / platform','err');return;}
+  const dir    = document.getElementById('ret-direction').value;
+  const model  = document.getElementById('ret-model').value;
+  const qty    = parseInt(document.getElementById('ret-qty').value)||0;
+  const notes  = document.getElementById('ret-notes').value.trim();
+  const date   = document.getElementById('ret-date').value || new Date().toISOString().split('T')[0];
   if(!model){toast('Please select a model number','err');return;}
   if(qty<1){toast('Qty must be at least 1','err');return;}
   const inv = INVENTORY_OPENING.find(o=>o.model===model);
-  const entry = {_id:_retNextId++, date, company, model, product:inv?inv.product:'', qty, condition:cond, reason, notes};
-  RETURNS_TRANSACTIONS.push(entry);
-  renderReturnsAll();
-  renderInventoryAll();
-  document.getElementById('ret-company').value='';
-  document.getElementById('ret-model').value='';
-  document.getElementById('ret-product').value='';
-  document.getElementById('ret-qty').value='1';
-  document.getElementById('ret-condition').value='Good';
-  document.getElementById('ret-reason').value='Customer Changed Mind';
-  document.getElementById('ret-notes').value='';
-  if(document.getElementById('ret-stock-warning')) document.getElementById('ret-stock-warning').style.display='none';
-  const msg = cond==='Good'
-    ? `Return saved ✅ — ${qty} unit(s) of ${model} added back to stock`
-    : `Return saved ❌ — ${qty} unit(s) of ${model} written off (Damaged)`;
-  toast(msg,'ok');
+
+  if(dir==='vendor'){
+    const vendor = document.getElementById('ret-vendor').value;
+    if(!vendor){toast('Please select a vendor','err');return;}
+    const unitCost = inv ? inv.unitCost : 0;
+    const apAmount = qty * unitCost;
+    const ref = 'RET-'+String(_retNextId+1).padStart(4,'0');
+    // Create AP Credit Note entry (reduces vendor balance)
+    AP_TRANSACTIONS.push({date, vendor, type:'Credit Note', ref, bill:0, payment:apAmount, notes:'Purchase Return — '+model+' × '+qty+' units'+(notes?' | '+notes:''), _id:_apNextId++});
+    // Save return record (vendor return reduces inventory)
+    const entry = {_id:_retNextId++, date, direction:'vendor', vendor, model, product:inv?inv.product:'', qty, condition:'Vendor Return', apAmount, notes, ref};
+    RETURNS_TRANSACTIONS.push(entry);
+    renderApAll();
+    renderReturnsAll();
+    renderInventoryAll();
+    // Reset form
+    document.getElementById('ret-vendor').value='';
+    document.getElementById('ret-model').value='';
+    document.getElementById('ret-product').value='';
+    document.getElementById('ret-qty').value='1';
+    document.getElementById('ret-notes').value='';
+    document.getElementById('ret-ap-preview-body').innerHTML='';
+    toast(`Vendor return saved — ${qty} unit(s) of ${model} returned to ${vendor} · AP reduced by EGP ${fmt(apAmount)}`,'ok');
+  } else {
+    const company = document.getElementById('ret-company').value;
+    if(!company){toast('Please select a company / platform','err');return;}
+    const cond   = document.getElementById('ret-condition').value;
+    const reason = document.getElementById('ret-reason').value;
+    const entry = {_id:_retNextId++, date, direction:'customer', company, model, product:inv?inv.product:'', qty, condition:cond, reason, notes};
+    RETURNS_TRANSACTIONS.push(entry);
+    renderReturnsAll();
+    renderInventoryAll();
+    document.getElementById('ret-company').value='';
+    document.getElementById('ret-model').value='';
+    document.getElementById('ret-product').value='';
+    document.getElementById('ret-qty').value='1';
+    document.getElementById('ret-condition').value='Good';
+    document.getElementById('ret-reason').value='Customer Changed Mind';
+    document.getElementById('ret-notes').value='';
+    document.getElementById('ret-stock-warning').style.display='none';
+    const msg = cond==='Good'
+      ? `Customer return saved ✅ — ${qty} unit(s) of ${model} added back to stock`
+      : `Customer return saved ❌ — ${qty} unit(s) of ${model} written off (Damaged)`;
+    toast(msg,'ok');
+  }
 }
 
 function deleteReturn(id){
   if(!confirm('Delete this return entry?')) return;
   const idx = RETURNS_TRANSACTIONS.findIndex(r=>r._id===id);
   if(idx===-1) return;
+  const r = RETURNS_TRANSACTIONS[idx];
+  // If vendor return, also remove the linked AP Credit Note
+  if(r.direction==='vendor' && r.ref){
+    const apIdx = AP_TRANSACTIONS.findIndex(t=>t.ref===r.ref && t.type==='Credit Note');
+    if(apIdx!==-1){ AP_TRANSACTIONS.splice(apIdx,1); renderApAll(); }
+  }
   RETURNS_TRANSACTIONS.splice(idx,1);
   renderReturnsAll();
   renderInventoryAll();
