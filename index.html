@@ -559,8 +559,8 @@ body.locked>*:not(#authGate){display:none}
     <div class="form-title">➕ Log New Return</div>
     <!-- Return type toggle -->
     <div style="display:flex;gap:10px;margin-bottom:16px">
-      <button id="ret-type-customer" class="btn-save" style="flex:1;background:var(--accent)" onclick="setReturnType('customer')">👤 Customer Return<br><small style="font-weight:400;opacity:.85">Customer returns item to us</small></button>
-      <button id="ret-type-vendor" class="btn-s" style="flex:1" onclick="setReturnType('vendor')">🏭 Vendor Return<br><small style="font-weight:400;opacity:.85">We return item to supplier → reduces AP</small></button>
+      <button id="ret-type-customer" class="btn-save" style="flex:1;background:var(--accent);color:#fff;opacity:1;outline:3px solid var(--green)" onclick="setReturnType('customer')">👤 Customer Return<br><small style="font-weight:400;opacity:.85">Customer returns item to us</small></button>
+      <button id="ret-type-vendor" class="btn-save" style="flex:1;background:var(--purple);color:#fff;opacity:0.45;outline:none" onclick="setReturnType('vendor')">🏭 Vendor Return<br><small style="font-weight:400;opacity:.85">We return item to supplier → reduces AP</small></button>
     </div>
     <input type="hidden" id="ret-direction" value="customer"/>
     <div class="form-grid">
