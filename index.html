@@ -430,7 +430,7 @@ body.locked>*:not(#authGate){display:none}
     <div class="form-grid">
       <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="ap-date"/></div>
       <div class="fg"><label class="fl">Vendor Name</label><input class="fi" type="text" id="ap-vendor" placeholder="e.g. الندى"/></div>
-      <div class="fg"><label class="fl">Transaction Type</label><select class="fs" id="ap-type"><option>Vendor Bill</option><option>Payment</option><option>Credit Note</option><option>Opening Balance</option></select></div>
+      <div class="fg"><label class="fl">Transaction Type</label><select class="fs" id="ap-type"><option>Vendor Bill</option><option>Payment</option><option>Return</option><option>Credit Note</option><option>Opening Balance</option></select></div>
       <div class="fg"><label class="fl">Reference / Invoice #</label><input class="fi" type="text" id="ap-ref" placeholder="INV-001"/></div>
       <div class="fg"><label class="fl">Bill Amount (EGP)</label><input class="fi" type="number" id="ap-bill" placeholder="0.00"/></div>
       <div class="fg"><label class="fl">Payment Amount (EGP)</label><input class="fi" type="number" id="ap-pay" placeholder="0.00"/></div>
@@ -809,7 +809,7 @@ function aggregateAP(transactions){
     if(type==='Opening Balance') v.opening += bill-pay;
     else if(type==='Vendor Bill') v.bills += bill;
     else if(type==='Payment') v.payments += pay;
-    else if(type==='Returns'||type==='Credit Note') v.payments += pay;
+    else if(type==='Return'||type==='Returns'||type==='Credit Note') v.payments += pay;
     else { v.bills+=bill; v.payments+=pay; }
     if(!isNaN(date) && (!v.last || date>v.last)) v.last=date;
     if(!isNaN(date) && date.getFullYear()===now.getFullYear() && date.getMonth()===now.getMonth()){
@@ -1897,7 +1897,7 @@ function saveReturn(){
     const apAmount = qty * unitCost;
     const ref = 'RET-'+String(_retNextId+1).padStart(4,'0');
     // Create AP Credit Note entry (reduces vendor balance)
-    AP_TRANSACTIONS.push({date, vendor, type:'Credit Note', ref, bill:0, payment:apAmount, notes:'Purchase Return — '+model+' × '+qty+' units'+(notes?' | '+notes:''), _id:_apNextId++});
+    AP_TRANSACTIONS.push({date, vendor, type:'Return', ref, bill:0, payment:apAmount, notes:'Purchase Return — '+model+' × '+qty+' units'+(notes?' | '+notes:''), _id:_apNextId++});
     // Save return record (vendor return reduces inventory)
     const entry = {_id:_retNextId++, date, direction:'vendor', vendor, model, product:inv?inv.product:'', qty, condition:'Vendor Return', apAmount, notes, ref};
     RETURNS_TRANSACTIONS.push(entry);
