@@ -775,7 +775,7 @@ function switchApView(view){
 }
 
 function renderTxnLog(){
-  const sorted = [...AP_TRANSACTIONS].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const sorted = allAP().sort((a,b)=> new Date(b.date) - new Date(a.date));
   const html = sorted.map(t=>{
     const rtl = isArabic(t.vendor) ? 'direction:rtl' : '';
     return `<tr><td style="color:var(--text2);font-size:.7rem">${fmtDateISO(t.date)}</td><td style="font-weight:500;${rtl}">${t.vendor}</td><td>${t.type}</td><td class="mono">${t.ref||'—'}</td><td class="amt" style="color:${t.bill?'var(--red)':'var(--text3)'}">${t.bill?fmt(t.bill):'–'}</td><td class="amt" style="color:${t.payment?'var(--green)':'var(--text3)'}">${t.payment?fmt(t.payment):'–'}</td><td style="color:var(--text2);font-size:.72rem">${t.notes||'—'}</td><td><button class="btn-del" onclick="deleteApTransaction(${t._id})" title="Delete entry">🗑</button></td></tr>`;
@@ -785,7 +785,7 @@ function renderTxnLog(){
 }
 
 function refreshVendorDropdown(){
-  const vendors = [...new Set(AP_TRANSACTIONS.map(t=>t.vendor))].sort((a,b)=>a.localeCompare(b));
+  const vendors = [...new Set(allAP().map(t=>t.vendor))].sort((a,b)=>a.localeCompare(b));
   const sel = document.getElementById('ledger-vendor-select');
   const prev = sel.value;
   sel.innerHTML = vendors.map(v=>`<option value="${v}">${v}</option>`).join('');
@@ -793,6 +793,9 @@ function refreshVendorDropdown(){
   sel.value = selected;
   renderVendorLedger(selected);
 }
+
+// All AP entries = Sheet data + local vendor return credits (sync-safe)
+function allAP(){ return [...AP_TRANSACTIONS, ...LOCAL_AP_RETURNS]; }
 
 // ---------- AP unified aggregation (AP_TRANSACTIONS + LOCAL_AP_RETURNS always merged) ----------
 function aggregateAP(transactions){
@@ -878,7 +881,7 @@ function renderApAll(){
 }
 
 function renderVendorLedger(vendor){
-  const txns = AP_TRANSACTIONS.filter(t=>t.vendor===vendor).sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const txns = allAP().filter(t=>t.vendor===vendor).sort((a,b)=> new Date(a.date)-new Date(b.date));
   let running=0, totalBill=0, totalPay=0;
   const rowsHtml = txns.map(t=>{
     running += (t.bill - t.payment);
@@ -898,7 +901,7 @@ function renderVendorLedger(vendor){
 function exportVendorLedger(){
   const vendor = document.getElementById('ledger-vendor-select').value;
   if(!vendor){ toast('Select a vendor first','err'); return; }
-  const txns = AP_TRANSACTIONS.filter(t=>t.vendor===vendor).sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const txns = allAP().filter(t=>t.vendor===vendor).sort((a,b)=> new Date(a.date)-new Date(b.date));
   let running=0, totalBill=0, totalPay=0;
   const aoa = [
     ['Vendor Statement'],
