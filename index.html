@@ -2189,10 +2189,12 @@ function loadApFromSheet(){
       payment: Number(r['Payment Amount (EGP)'])||0,
       notes: r['Notes']||'',
     }));
+    // Preserve locally-added Return entries (from Returns tab) before overwriting with Sheet data
+    const localReturns = AP_TRANSACTIONS.filter(t=>t.type==='Return' && t.ref && t.ref.startsWith('RET-'));
     parsed.forEach((t,i)=>t._id=i);
-    _apNextId = parsed.length;
+    _apNextId = parsed.length + localReturns.length;
     AP_TRANSACTIONS.length = 0;
-    AP_TRANSACTIONS.push(...parsed);
+    AP_TRANSACTIONS.push(...parsed, ...localReturns);
     renderApAll();
     markSynced();
   }, markSyncFailed);
