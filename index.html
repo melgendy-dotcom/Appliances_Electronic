@@ -1850,7 +1850,7 @@ function renderReturnsTable(){
       <td>${condPill}</td>
       <td>${apImpact}</td>
       <td style="color:var(--text2);font-size:.75rem">${reasonNotes}</td>
-      <td><button class="del-btn" onclick="deleteReturn(${r._id})">🗑</button></td>
+      <td><button class="btn-del" onclick="deleteReturn(${r._id})" title="Delete">🗑</button></td>
     </tr>`;
   }).join('');
   const tbody = document.getElementById('tb-ret');
@@ -1943,7 +1943,7 @@ function deleteReturn(id){
   const r = RETURNS_TRANSACTIONS[idx];
   // If vendor return, also remove the linked AP Credit Note
   if(r.direction==='vendor' && r.ref){
-    const apIdx = AP_TRANSACTIONS.findIndex(t=>t.ref===r.ref && t.type==='Credit Note');
+    const apIdx = AP_TRANSACTIONS.findIndex(t=>t.ref===r.ref && (t.type==='Return'||t.type==='Credit Note'));
     if(apIdx!==-1){ AP_TRANSACTIONS.splice(apIdx,1); renderApAll(); }
   }
   RETURNS_TRANSACTIONS.splice(idx,1);
