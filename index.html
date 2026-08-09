@@ -346,8 +346,30 @@ body.locked>*:not(#authGate){display:none}
   <div class="tbl-card">
     <div class="tbl-toolbar"><div class="tbl-title">Stock Ledger</div><input class="search-inp" type="text" placeholder="🔍 Search model, product…"/><select class="fsel"><option>All Status</option><option>✅ In Stock</option><option>⚠ Low</option><option>❌ Out</option><option>❌ Neg</option></select><button class="btn-import" onclick="triggerImport('inv')" title="Seed/replace opening stock balances">📥 Set Opening Balance</button><span class="tbl-sub" id="inv-sub">0 SKUs</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Model No.</th><th>Product</th><th>Avg Cost (WAC)</th><th>Opening</th><th>Rcvd</th><th>Sold</th><th style="color:var(--blue)">Returned</th><th>Available</th><th>Stock Value</th><th>Status</th></tr></thead>
+      <thead><tr><th>Model No.</th><th>Product</th><th>Avg Cost (WAC)</th><th>Opening</th><th>Rcvd</th><th>Sold</th><th style="color:var(--blue)">Returned</th><th style="color:var(--purple)">Adjusted</th><th>Available</th><th>Stock Value</th><th>Status</th></tr></thead>
       <tbody id="tb-inv"></tbody>
+    </table></div>
+  </div>
+
+  <!-- Journal Entry -->
+  <div class="form-panel" style="border-top:2px solid var(--purple);margin-top:18px">
+    <div class="form-title" style="color:var(--purple)">📒 Inventory Journal Entry <span style="font-size:.75rem;font-weight:400;color:var(--text2);margin-left:8px">Add items not from a Purchase Order</span></div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="adj-date"/></div>
+      <div class="fg"><label class="fl">Model No.</label><input class="fi" type="text" id="adj-model" placeholder="Type model number…" oninput="adjAutoFill()"/></div>
+      <div class="fg"><label class="fl">Product Name (AR)</label><input class="fi" type="text" id="adj-product" dir="rtl" placeholder="اسم المنتج" readonly style="color:var(--text2)"/></div>
+      <div class="fg"><label class="fl">Qty Added</label><input class="fi" type="number" id="adj-qty" value="1" min="1"/></div>
+      <div class="fg"><label class="fl">Unit Cost (EGP)</label><input class="fi" type="number" id="adj-cost" placeholder="0.00"/></div>
+      <div class="fg"><label class="fl">Reason</label><select class="fs" id="adj-reason"><option>Sample / Demo</option><option>Gift / Donation</option><option>Transfer In</option><option>Warehouse Found</option><option>Opening Correction</option><option>Other</option></select></div>
+      <div class="fg" style="grid-column:span 2"><label class="fl">Notes</label><input class="fi" type="text" id="adj-notes" placeholder="Optional notes…"/></div>
+    </div>
+    <button class="btn-save" style="background:var(--purple)" onclick="saveInvJournal()">✓ Save Journal Entry</button>
+  </div>
+  <div class="tbl-card" style="margin-top:14px">
+    <div class="tbl-toolbar"><div class="tbl-title" style="color:var(--purple)">📒 Journal Entries</div><span class="tbl-sub" id="adj-sub">0 entries</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Date</th><th>Model No.</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Reason</th><th>Notes</th><th>Action</th></tr></thead>
+      <tbody id="tb-adj"></tbody>
     </table></div>
   </div>
 </div>
@@ -998,6 +1020,7 @@ document.addEventListener('DOMContentLoaded',wireTables);
 // ---------- localStorage persistence for Purchasing & Sales ----------
 function persistPO(){ try{ localStorage.setItem('app_po', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
 function persistSales(){ try{ localStorage.setItem('app_sales', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
+function persistAdj(){ try{ localStorage.setItem('app_adj', JSON.stringify(INVENTORY_ADJUSTMENTS)); }catch(e){} }
 function loadPersistedData(){
   try{
     const po = JSON.parse(localStorage.getItem('app_po')||'[]');
@@ -1007,8 +1030,12 @@ function loadPersistedData(){
     const sales = JSON.parse(localStorage.getItem('app_sales')||'[]');
     if(sales.length){ SALES_TRANSACTIONS.push(...sales); _salesNextId=sales.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
+  try{
+    const adj = JSON.parse(localStorage.getItem('app_adj')||'[]');
+    if(adj.length){ INVENTORY_ADJUSTMENTS.push(...adj); _adjNextId=adj.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
+  }catch(e){}
 }
-document.addEventListener('DOMContentLoaded',()=>{ loadPersistedData(); renderPurchasingAll(); renderSalesAll(); renderSalesJournalPreview(); renderReturnsAll(); });
+document.addEventListener('DOMContentLoaded',()=>{ loadPersistedData(); renderPurchasingAll(); renderSalesAll(); renderSalesJournalPreview(); renderReturnsAll(); renderInvJournalTable(); });
 
 function prependRow(tbodyId,html){
   const tbody=document.getElementById(tbodyId);
@@ -1136,6 +1163,10 @@ let _retNextId = 0;
 // Vendor return AP credits — kept separate so Google Sheets sync never wipes them
 const LOCAL_AP_RETURNS = [];
 
+// Manual inventory journal entries (items not from Purchase orders)
+const INVENTORY_ADJUSTMENTS = [];
+let _adjNextId = 0;
+
 function modelLookup(){
   const map = {};
   INVENTORY_OPENING.forEach(o=>{ map[o.model] = {product:o.product}; });
@@ -1262,19 +1293,28 @@ function computeInventory(){
     if(!isNaN(d) && (!models[s.model].lastSale || d>models[s.model].lastSale)) models[s.model].lastSale = d;
   });
   RETURNS_TRANSACTIONS.forEach(r=>{
-    if(!models[r.model]) models[r.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, returned:0, vendorReturned:0, lastSale:null};
+    if(!models[r.model]) models[r.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, returned:0, vendorReturned:0, adjusted:0, adjValue:0, lastSale:null};
     if(r.direction==='customer' && r.condition==='Good') models[r.model].returned = (models[r.model].returned||0) + r.qty;
     if(r.direction==='vendor') models[r.model].vendorReturned = (models[r.model].vendorReturned||0) + r.qty;
   });
+  INVENTORY_ADJUSTMENTS.forEach(a=>{
+    const modelKey = (a.model||'').trim().toLowerCase();
+    const fallbackCost = openingCostLookup[modelKey] || 0;
+    const cost = a.unitCost || fallbackCost;
+    if(!models[a.model]) models[a.model] = {product:a.product||'', openingQty:0, openingCost:cost, rcvd:0, purchValue:0, sold:0, returned:0, vendorReturned:0, adjusted:0, adjValue:0, lastSale:null};
+    models[a.model].adjusted = (models[a.model].adjusted||0) + a.qty;
+    models[a.model].adjValue = (models[a.model].adjValue||0) + a.qty * cost;
+  });
   return Object.entries(models).map(([model,m])=>{
-    const totalQtyForWAC = m.openingQty + m.rcvd;
-    const rawWac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue) / totalQtyForWAC : m.openingCost;
+    const totalQtyForWAC = m.openingQty + m.rcvd + (m.adjusted||0);
+    const rawWac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue + (m.adjValue||0)) / totalQtyForWAC : m.openingCost;
     // If WAC is still zero, fall back to INVENTORY_OPENING cost
     const wac = rawWac || openingCostLookup[(model||'').trim().toLowerCase()] || 0;
     const returned = m.returned||0;
     const vendorReturned = m.vendorReturned||0;
-    const available = m.openingQty + m.rcvd + returned - m.sold - vendorReturned;
-    return {model, product:m.product, avgCost:wac, opening:m.openingQty, rcvd:m.rcvd, sold:m.sold, returned, vendorReturned, available, stockValue:wac*available, lastSale:m.lastSale};
+    const adjusted = m.adjusted||0;
+    const available = m.openingQty + m.rcvd + adjusted + returned - m.sold - vendorReturned;
+    return {model, product:m.product, avgCost:wac, opening:m.openingQty, rcvd:m.rcvd, sold:m.sold, returned, vendorReturned, adjusted, available, stockValue:wac*available, lastSale:m.lastSale};
   }).sort((a,b)=>b.stockValue-a.stockValue);
 }
 
@@ -1305,7 +1345,8 @@ function renderInventoryAll(){
   const rowsHtml = list.map(x=>{
     const [pill,label,availColor] = statusInfo(x.available);
     const retCell = x.returned>0 ? `<span style="color:var(--blue);font-weight:600">+${x.returned}</span>` : `<span style="color:var(--text3)">—</span>`;
-    return `<tr><td class="mono">${x.model}</td><td class="rtl">${x.product||'—'}</td><td class="amt">${fmt(x.avgCost)}</td><td class="mono">${x.opening}</td><td class="mono">${x.rcvd}</td><td class="mono">${x.sold}</td><td class="mono">${retCell}</td><td class="mono" style="color:${availColor}">${x.available}</td><td class="amt" style="color:${x.stockValue<0?'var(--red)':''}">${fmt(x.stockValue)}</td><td><span class="pill ${pill}">${label}</span></td></tr>`;
+    const adjCell = x.adjusted>0 ? `<span style="color:var(--purple);font-weight:600">+${x.adjusted}</span>` : `<span style="color:var(--text3)">—</span>`;
+    return `<tr><td class="mono">${x.model}</td><td class="rtl">${x.product||'—'}</td><td class="amt">${fmt(x.avgCost)}</td><td class="mono">${x.opening}</td><td class="mono">${x.rcvd}</td><td class="mono">${x.sold}</td><td class="mono">${retCell}</td><td class="mono">${adjCell}</td><td class="mono" style="color:${availColor}">${x.available}</td><td class="amt" style="color:${x.stockValue<0?'var(--red)':''}">${fmt(x.stockValue)}</td><td><span class="pill ${pill}">${label}</span></td></tr>`;
   }).join('');
   document.getElementById('tb-inv').innerHTML = rowsHtml || '<tr class="empty-row"><td colspan="11" style="text-align:center;color:var(--text2);padding:22px">No inventory data yet</td></tr>';
   document.getElementById('inv-sub').textContent = total+' SKUs';
@@ -1336,6 +1377,64 @@ function renderInventoryAll(){
   document.getElementById('inv-donut-legend').innerHTML = segs.map(s=>
     `<div class="dleg-item"><div class="dleg-dot" style="background:${s.color}"></div>${s.label} · ${s.value}</div>`
   ).join('');
+}
+
+function adjAutoFill(){
+  const model = document.getElementById('adj-model').value.trim();
+  const info = modelLookup()[model];
+  document.getElementById('adj-product').value = info ? (info.product||'') : '';
+  const inv = computeInventory().find(x=>x.model===model);
+  const costEl = document.getElementById('adj-cost');
+  if(inv && inv.avgCost && !costEl.value) costEl.value = inv.avgCost.toFixed(2);
+}
+
+function saveInvJournal(){
+  const date = document.getElementById('adj-date').value || new Date().toISOString().slice(0,10);
+  const model = document.getElementById('adj-model').value.trim();
+  const product = document.getElementById('adj-product').value.trim();
+  const qty = n(document.getElementById('adj-qty').value);
+  const unitCost = n(document.getElementById('adj-cost').value);
+  const reason = document.getElementById('adj-reason').value;
+  const notes = document.getElementById('adj-notes').value.trim();
+  if(!model){ toast('Model number is required','err'); return; }
+  if(!qty || qty<1){ toast('Qty must be at least 1','err'); return; }
+  const entry = {_id:_adjNextId++, date, model, product, qty, unitCost, reason, notes};
+  INVENTORY_ADJUSTMENTS.push(entry);
+  persistAdj();
+  resetForm(['adj-model','adj-product','adj-qty','adj-cost','adj-notes']);
+  document.getElementById('adj-qty').value = 1;
+  renderInvJournalTable();
+  renderInventoryAll();
+  toast('Journal entry saved — Inventory updated','ok');
+}
+
+function deleteInvJournal(id){
+  const idx = INVENTORY_ADJUSTMENTS.findIndex(a=>a._id===id);
+  if(idx===-1) return;
+  INVENTORY_ADJUSTMENTS.splice(idx,1);
+  persistAdj();
+  renderInvJournalTable();
+  renderInventoryAll();
+  toast('Journal entry deleted','ok');
+}
+
+function renderInvJournalTable(){
+  const tbody = document.getElementById('tb-adj');
+  if(!tbody) return;
+  const sorted = [...INVENTORY_ADJUSTMENTS].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('adj-sub').textContent = sorted.length+' entries';
+  tbody.innerHTML = sorted.length ? sorted.map(a=>`
+    <tr>
+      <td class="mono">${a.date}</td>
+      <td class="mono">${a.model}</td>
+      <td class="rtl">${a.product||'—'}</td>
+      <td class="mono" style="color:var(--purple);font-weight:600">+${a.qty}</td>
+      <td class="amt">${a.unitCost?fmt(a.unitCost):'—'}</td>
+      <td>${a.reason}</td>
+      <td style="color:var(--text2);font-size:.8rem">${a.notes||'—'}</td>
+      <td><button class="btn-del" onclick="deleteInvJournal(${a._id})">🗑</button></td>
+    </tr>`).join('') :
+    '<tr class="empty-row"><td colspan="8" style="text-align:center;color:var(--text2);padding:22px">No journal entries yet</td></tr>';
 }
 
 function autofillFromModel(prefix){
