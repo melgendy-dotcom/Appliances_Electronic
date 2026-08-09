@@ -569,7 +569,7 @@ body.locked>*:not(#authGate){display:none}
       <div class="fg" id="ret-fg-company"><label class="fl">Company / Platform</label><select class="fs" id="ret-company"><option value="">— Select Company —</option><option>1. Raya</option><option>2. Noon</option><option>3. Amazon</option><option>4. Jumia</option><option>5. B.Tech</option><option>6. Raneen</option><option>7. Kenzz</option><option>Other</option></select></div>
       <!-- Vendor Return fields -->
       <div class="fg" id="ret-fg-vendor" style="display:none"><label class="fl">Vendor (Supplier)</label><select class="fs" id="ret-vendor"><option value="">— Select Vendor —</option></select></div>
-      <div class="fg"><label class="fl">Model Number</label><select class="fs" id="ret-model" onchange="autoFillRetProduct()"><option value="">— Select Model —</option></select></div>
+      <div class="fg"><label class="fl">Model Number</label><input class="fi" type="text" id="ret-model" placeholder="Type model number…" oninput="autoFillRetProduct()"/></div>
       <div class="fg"><label class="fl">Product Name</label><input class="fi" type="text" id="ret-product" placeholder="Auto-filled from model" readonly style="background:var(--surface2);color:var(--text2)"/></div>
       <div class="fg"><label class="fl">Qty</label><input class="fi" type="number" id="ret-qty" min="1" value="1" placeholder="1" oninput="updateReturnApPreview()"/></div>
       <!-- Condition — only for customer returns -->
@@ -1773,17 +1773,7 @@ function setReturnType(dir){
 }
 
 function populateReturnModelDropdown(){
-  const sel = document.getElementById('ret-model');
-  if(!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">— Select Model —</option>';
-  INVENTORY_OPENING.forEach(o=>{
-    const opt = document.createElement('option');
-    opt.value = o.model;
-    opt.textContent = o.model + ' — ' + (o.product||'').substring(0,40);
-    sel.appendChild(opt);
-  });
-  if(current) sel.value = current;
+  // Model is now a free-text input — nothing to populate
 }
 
 function populateReturnVendorDropdown(){
