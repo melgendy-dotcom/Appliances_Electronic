@@ -995,7 +995,20 @@ function wireTables(){
   });
 }
 document.addEventListener('DOMContentLoaded',wireTables);
-document.addEventListener('DOMContentLoaded',()=>{ renderPurchasingAll(); renderSalesAll(); renderSalesJournalPreview(); renderReturnsAll(); });
+// ---------- localStorage persistence for Purchasing & Sales ----------
+function persistPO(){ try{ localStorage.setItem('app_po', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
+function persistSales(){ try{ localStorage.setItem('app_sales', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
+function loadPersistedData(){
+  try{
+    const po = JSON.parse(localStorage.getItem('app_po')||'[]');
+    if(po.length){ PURCHASE_ORDERS.push(...po); _poNextId=po.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
+  }catch(e){}
+  try{
+    const sales = JSON.parse(localStorage.getItem('app_sales')||'[]');
+    if(sales.length){ SALES_TRANSACTIONS.push(...sales); _salesNextId=sales.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded',()=>{ loadPersistedData(); renderPurchasingAll(); renderSalesAll(); renderSalesJournalPreview(); renderReturnsAll(); });
 
 function prependRow(tbodyId,html){
   const tbody=document.getElementById(tbodyId);
@@ -1203,6 +1216,7 @@ function deletePurchaseOrder(id){
   const p = PURCHASE_ORDERS[idx];
   if(!confirm('Delete this purchase order?\n'+p.supplier+' · '+p.model+' · Qty '+p.qty)) return;
   PURCHASE_ORDERS.splice(idx,1);
+  persistPO();
   renderPurchasingAll();
   toast('Purchase order deleted — Inventory updated','ok');
 }
@@ -1216,6 +1230,7 @@ function savePO(){
   const method=document.getElementById('po-method').value;
   const paid=n(document.getElementById('po-paid').value);
   PURCHASE_ORDERS.push({date, supplier:sup, model, orderNo:'', qty, unitCost:unit, method, paid, _id:_poNextId++});
+  persistPO();
   renderPurchasingAll();
   resetForm(['po-sup','po-model','po-prod','po-qty','po-unit','po-total','po-paid','po-bal']);
   document.getElementById('po-date').value=new Date().toISOString().split('T')[0];
@@ -1436,6 +1451,7 @@ function deleteSaleTransaction(id){
   const s = SALES_TRANSACTIONS[idx];
   if(!confirm('Delete this sale?\n'+s.platform+' · '+s.model+' · Qty '+s.qty+'\nThis also removes the linked AR invoice.')) return;
   SALES_TRANSACTIONS.splice(idx,1);
+  persistSales();
   renderSalesAll();
   toast('Sale deleted — Inventory and AR updated','ok');
 }
@@ -1450,6 +1466,7 @@ function saveSale(){
   const qty=n(document.getElementById('s-qty').value)||1;
   const status=document.getElementById('s-pay').value;
   SALES_TRANSACTIONS.push({date, platform, model, orderNo, qty, saleAmount:amtPerUnit, status, _id:_salesNextId++});
+  persistSales();
   renderSalesAll();
   resetForm(['s-mod','s-prod','s-ord','s-qty','s-amt','s-cost','s-gp']);
   document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
@@ -1710,6 +1727,7 @@ function importPurchasing(wb){
   _poNextId = parsed.length;
   PURCHASE_ORDERS.length = 0;
   PURCHASE_ORDERS.push(...parsed);
+  persistPO();
   renderPurchasingAll();
   toast('Imported '+parsed.length+' purchase orders — Inventory updated','ok');
 }
@@ -1733,6 +1751,7 @@ function importSalesData(wb){
   _salesNextId = parsed.length;
   SALES_TRANSACTIONS.length = 0;
   SALES_TRANSACTIONS.push(...parsed);
+  persistSales();
   renderSalesAll();
   toast('Imported '+parsed.length+' sales — Inventory deducted, AR updated','ok');
 }
