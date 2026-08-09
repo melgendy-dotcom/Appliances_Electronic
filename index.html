@@ -307,7 +307,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="savePO()">✓ Save Purchase Order</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><span class="tbl-sub" id="po-sub">0 records</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="downloadPurchasingTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><span class="tbl-sub" id="po-sub">0 records</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
       <tbody id="tb-po"></tbody>
@@ -396,7 +396,7 @@ body.locked>*:not(#authGate){display:none}
     </table></div>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…"/><select class="fsel" id="s-filter-channel"><option>All Platforms</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…"/><select class="fsel" id="s-filter-channel"><option>All Platforms</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><button class="btn-import" onclick="downloadSalesTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Platform</th><th>Model</th><th>Product</th><th>Order #</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="tb-sales"></tbody>
@@ -1565,6 +1565,30 @@ function saveAR(){
 
 // ---------- Expenses ----------
 // ---------- Excel Import ----------
+function downloadPurchasingTemplate(){
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['Date','Supplier','Model No.','Product Name (AR)','QTY Ordered','Unit Cost (EGP)','Pay Method','Terms (Days)','Amount Paid'],
+    ['2026-08-01','اسم المورد','MODEL-001','اسم المنتج',1,0,'Cash',0,0],
+  ]);
+  ws['!cols'] = [10,18,14,30,10,14,14,12,12].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Purchasing');
+  XLSX.writeFile(wb, 'Purchasing_Template.xlsx');
+  toast('Purchasing template downloaded','ok');
+}
+
+function downloadSalesTemplate(){
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['Date','Platform','Model No.','Product Name (AR)','Order Number','QTY Sold','Sale amount','Payment Status'],
+    ['2026-08-01','1. Raya','MODEL-001','اسم المنتج','ORD-001',1,0,'Paid'],
+  ]);
+  ws['!cols'] = [10,12,14,30,14,10,14,14].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sales');
+  XLSX.writeFile(wb, 'Sales_Template.xlsx');
+  toast('Sales template downloaded','ok');
+}
+
 function triggerImport(moduleKey){
   window._importTarget = moduleKey;
   const input = document.getElementById('excelFileInput');
