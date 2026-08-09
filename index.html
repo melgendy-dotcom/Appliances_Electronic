@@ -1228,10 +1228,17 @@ function computeInventory(){
   INVENTORY_OPENING.forEach(o=>{
     models[o.model] = {product:o.product, openingQty:o.openingQty, openingCost:o.unitCost, rcvd:0, purchValue:0, sold:0, lastSale:null};
   });
+  // Build a cost lookup from INVENTORY_OPENING for fallback when PO has no unit cost
+  const openingCostLookup = {};
+  INVENTORY_OPENING.forEach(o=>{ openingCostLookup[o.model.trim().toLowerCase()] = o.unitCost; });
+
   PURCHASE_ORDERS.forEach(p=>{
-    if(!models[p.model]) models[p.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, lastSale:null};
+    const modelKey = (p.model||'').trim().toLowerCase();
+    // If PO has no unit cost, fall back to INVENTORY_OPENING cost for that model
+    const effectiveCost = p.unitCost || openingCostLookup[modelKey] || 0;
+    if(!models[p.model]) models[p.model] = {product:'', openingQty:0, openingCost:effectiveCost, rcvd:0, purchValue:0, sold:0, lastSale:null};
     models[p.model].rcvd += p.qty;
-    models[p.model].purchValue += p.qty*p.unitCost;
+    models[p.model].purchValue += p.qty * effectiveCost;
   });
   SALES_TRANSACTIONS.forEach(s=>{
     if(!models[s.model]) models[s.model] = {product:'', openingQty:0, openingCost:0, rcvd:0, purchValue:0, sold:0, returned:0, lastSale:null};
@@ -1246,7 +1253,9 @@ function computeInventory(){
   });
   return Object.entries(models).map(([model,m])=>{
     const totalQtyForWAC = m.openingQty + m.rcvd;
-    const wac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue) / totalQtyForWAC : m.openingCost;
+    const rawWac = totalQtyForWAC ? (m.openingQty*m.openingCost + m.purchValue) / totalQtyForWAC : m.openingCost;
+    // If WAC is still zero, fall back to INVENTORY_OPENING cost
+    const wac = rawWac || openingCostLookup[(model||'').trim().toLowerCase()] || 0;
     const returned = m.returned||0;
     const vendorReturned = m.vendorReturned||0;
     const available = m.openingQty + m.rcvd + returned - m.sold - vendorReturned;
