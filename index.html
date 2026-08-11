@@ -1152,29 +1152,8 @@ const INVENTORY_OPENING = [
   {model:'MX-EX1021WTZ', product:'خلاط باناسونيك 400 واط', openingQty:1, unitCost:1788},
 ];
 
-const SALES_TRANSACTIONS = [
-  {date:'2026-08-09',platform:'7. Kenzz',model:'AFK-1865',orderNo:'XZVBCP9VZWM7',qty:1,saleAmount:0,status:'Paid',_id:0},
-  {date:'2026-08-09',platform:'7. Kenzz',model:'PAC10K- PbWA',orderNo:'7ATCQKAFE3C4',qty:1,saleAmount:0,status:'Paid',_id:1},
-  {date:'2026-08-09',platform:'7. Kenzz',model:'MC-YL633',orderNo:'VTZCMGC4G5J6',qty:1,saleAmount:0,status:'Paid',_id:2},
-  {date:'2026-08-09',platform:'7. Kenzz',model:'FR BO80M',orderNo:'85R3MPQM5WF5',qty:1,saleAmount:0,status:'Paid',_id:3},
-  {date:'2026-08-09',platform:'4. Raneen',model:'ART012CY50XFR-SG-SER-S1',orderNo:'2010035582',qty:2,saleAmount:0,status:'Paid',_id:4},
-  {date:'2026-08-09',platform:'4. Raneen',model:'AC1185TR',orderNo:'2010032468',qty:1,saleAmount:0,status:'Paid',_id:5},
-  {date:'2026-08-09',platform:'4. Raneen',model:'CFJ-563',orderNo:'2010031136',qty:1,saleAmount:0,status:'Paid',_id:6},
-  {date:'2026-08-09',platform:'3. B Tech',model:'WFS-181',orderNo:'508538647',qty:5,saleAmount:0,status:'Paid',_id:7},
-  {date:'2026-08-09',platform:'3. B Tech',model:'SFJ-211',orderNo:'508527822',qty:3,saleAmount:0,status:'Paid',_id:8},
-  {date:'2026-08-09',platform:'3. B Tech',model:'DST3020',orderNo:'508547773',qty:1,saleAmount:0,status:'Paid',_id:9},
-  {date:'2026-08-09',platform:'3. B Tech',model:'CH-700',orderNo:'508548801',qty:1,saleAmount:0,status:'Paid',_id:10},
-  {date:'2026-08-09',platform:'3. B Tech',model:'TK-CS200',orderNo:'508538609',qty:1,saleAmount:0,status:'Paid',_id:11},
-  {date:'2026-08-09',platform:'3. B Tech',model:'Babyliss 6704E',orderNo:'508553081',qty:1,saleAmount:0,status:'Paid',_id:12},
-  {date:'2026-08-09',platform:'7. Kenzz',model:'ZJM01.AOBK',orderNo:'LWJ2GAZGN8RE',qty:1,saleAmount:0,status:'Paid',_id:13},
-  {date:'2026-08-09',platform:'3. B Tech',model:'HST1500-B5',orderNo:'508551528',qty:1,saleAmount:0,status:'Paid',_id:14},
-  {date:'2026-08-09',platform:'7. Kenzz',model:'HST1500-B5',orderNo:'JKRQQ87NHQDB',qty:1,saleAmount:0,status:'Paid',_id:15},
-  {date:'2026-08-09',platform:'3. B Tech',model:'ST335E',orderNo:'508539650',qty:1,saleAmount:0,status:'Paid',_id:16},
-  {date:'2026-08-09',platform:'3. B Tech',model:'ST397E',orderNo:'508545001',qty:1,saleAmount:0,status:'Paid',_id:17},
-  {date:'2026-08-09',platform:'3. B Tech',model:'CW128-3061',orderNo:'508538497',qty:2,saleAmount:0,status:'Paid',_id:18},
-];
-SALES_TRANSACTIONS.forEach((t,i)=>t._id=i);
-let _salesNextId = 19;
+const SALES_TRANSACTIONS = [];
+let _salesNextId = 0;
 
 const AR_MANUAL_ENTRIES = [];
 let _arNextId = 0;
@@ -1869,13 +1848,13 @@ function importSalesData(wb){
     saleAmount: Number(pick(r,['Sale amount','Sale Amount','Amount','Price','Total','سعر البيع','مبلغ البيع','الاجمالي'])) || 0,
     status: pick(r,['Payment Status','Status','Pay Status','حالة الدفع']) || 'Pending',
   }));
-  parsed.forEach((s,i)=>s._id=i);
-  _salesNextId = parsed.length;
-  SALES_TRANSACTIONS.length = 0;
-  SALES_TRANSACTIONS.push(...parsed);
+  // Find all dates in the new file, remove existing entries for those dates, then add new ones
+  const newDates = new Set(parsed.map(s=>s.date).filter(Boolean));
+  newDates.forEach(d=>{ const keep=SALES_TRANSACTIONS.filter(s=>s.date!==d); SALES_TRANSACTIONS.length=0; SALES_TRANSACTIONS.push(...keep); });
+  parsed.forEach(s=>{ s._id=_salesNextId++; SALES_TRANSACTIONS.push(s); });
   persistSales();
   renderSalesAll();
-  toast('Imported '+parsed.length+' sales — Inventory deducted, AR updated','ok');
+  toast('Imported '+parsed.length+' sales for '+[...newDates].join(', ')+' — added to register','ok');
 }
 
 function todayStrFromDate(d){ return d.toLocaleDateString('en-GB'); }
