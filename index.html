@@ -1019,7 +1019,7 @@ function wireTables(){
 document.addEventListener('DOMContentLoaded',wireTables);
 // ---------- localStorage persistence for Purchasing & Sales ----------
 function persistPO(){ try{ localStorage.setItem('app_po', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
-function persistSales(){ try{ localStorage.setItem('app_sales', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
+function persistSales(){ try{ localStorage.setItem('app_sales_v2', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
 function persistAdj(){ try{ localStorage.setItem('app_adj', JSON.stringify(INVENTORY_ADJUSTMENTS)); }catch(e){} }
 function loadPersistedData(){
   try{
@@ -1027,7 +1027,7 @@ function loadPersistedData(){
     if(po.length){ PURCHASE_ORDERS.push(...po); _poNextId=po.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
   try{
-    const sales = JSON.parse(localStorage.getItem('app_sales')||'[]');
+    const sales = JSON.parse(localStorage.getItem('app_sales_v2')||'[]');
     if(sales.length){ SALES_TRANSACTIONS.length=0; SALES_TRANSACTIONS.push(...sales); _salesNextId=sales.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
   try{
