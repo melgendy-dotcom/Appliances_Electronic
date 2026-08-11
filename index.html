@@ -1775,7 +1775,7 @@ function importAP(wb){
     if(!vendor) return;
     const date = toJsDate(pick(row,['Date']));
     parsed.push({
-      date: date ? date.toISOString().split('T')[0] : '',
+      date: date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}` : '',
       vendor,
       type: pick(row,['Transaction Type','Type']) || '',
       ref: pick(row,['Reference / Invoice #','Reference','Ref']) || '',
@@ -1815,7 +1815,7 @@ function importPurchasing(wb){
     return m && m!=='#REF!';
   });
   const parsed = rows.map(r=>({
-    date: (()=>{ const d=toJsDate(pick(r,['Order date','Date'])); return d?d.toISOString().split('T')[0]:''; })(),
+    date: (()=>{ const d=toJsDate(pick(r,['Order date','Date','Order date '])); return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''; })(),
     supplier: pick(r,['Supplier']) || '—',
     model: pick(r,['Model No.','Model']),
     orderNo: pick(r,['Order Number']) || '',
@@ -1841,7 +1841,7 @@ function importSalesData(wb){
   });
   if(!rows.length){ toast('No rows found — check column headers match the template','err'); return; }
   const parsed = rows.map(r=>({
-    date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?d.toISOString().split('T')[0]:''; })(),
+    date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''; })(),
     platform: pick(r,['Platform','Channel','Sales Channel','المنصة','القناة','1. Raya']) || '—',
     model: String(pick(r,['Model No.','Model No','Model','model','SKU','Item Code','كود','موديل','رقم الموديل'])||'').trim(),
     orderNo: pick(r,['Order Number','Order No.','Order No','Order #','Order','رقم الاوردر','رقم الطلب']) || '',
