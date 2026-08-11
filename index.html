@@ -1754,6 +1754,7 @@ function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null})
 function pick(row, names){ for(const k of names){ if(row[k]!==undefined && row[k]!==null && row[k]!=='') return row[k]; } return null; }
 function toJsDate(v){
   if(v instanceof Date) return v;
+  if(typeof v==='number' && v>1000){ const d=new Date((v-25569)*86400000); return isNaN(d)?null:d; } // Excel serial
   if(typeof v==='string'){ const d=new Date(v); return isNaN(d)?null:d; }
   return null;
 }
@@ -1833,19 +1834,20 @@ function importPurchasing(wb){
 }
 
 function importSalesData(wb){
-  const sheet = findSheet(wb, ['sales']);
+  const sheet = findSheet(wb, ['sales','sale','مبيع','مبيعات']);
   const rows = sheetRows(sheet).filter(r=>{
-    const m = pick(r,['Model No.','Model']);
-    return m && m!=='TOTAL';
+    const m = pick(r,['Model No.','Model No','Model','model','SKU','Item Code','كود','موديل','رقم الموديل']);
+    return m && String(m).trim() && String(m).trim().toUpperCase()!=='TOTAL' && String(m).trim().toUpperCase()!=='MODEL NO.';
   });
+  if(!rows.length){ toast('No rows found — check column headers match the template','err'); return; }
   const parsed = rows.map(r=>({
-    date: (()=>{ const d=toJsDate(pick(r,['Date'])); return d?d.toISOString().split('T')[0]:''; })(),
-    platform: pick(r,['Platform','Channel']) || '—',
-    model: pick(r,['Model No.','Model']),
-    orderNo: pick(r,['Order Number']) || '',
-    qty: Number(pick(r,['QTY Sold','Qty Sold','Qty'])) || 1,
-    saleAmount: Number(pick(r,['Sale amount','Sale Amount'])) || 0,
-    status: pick(r,['Payment Status','Status']) || 'Pending',
+    date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?d.toISOString().split('T')[0]:''; })(),
+    platform: pick(r,['Platform','Channel','Sales Channel','المنصة','القناة','1. Raya']) || '—',
+    model: String(pick(r,['Model No.','Model No','Model','model','SKU','Item Code','كود','موديل','رقم الموديل'])||'').trim(),
+    orderNo: pick(r,['Order Number','Order No.','Order No','Order #','Order','رقم الاوردر','رقم الطلب']) || '',
+    qty: Number(pick(r,['QTY Sold','Qty Sold','Qty','QTY','Quantity','الكمية','كمية'])) || 1,
+    saleAmount: Number(pick(r,['Sale amount','Sale Amount','Amount','Price','Total','سعر البيع','مبلغ البيع','الاجمالي'])) || 0,
+    status: pick(r,['Payment Status','Status','Pay Status','حالة الدفع']) || 'Pending',
   }));
   parsed.forEach((s,i)=>s._id=i);
   _salesNextId = parsed.length;
