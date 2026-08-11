@@ -1028,7 +1028,7 @@ function loadPersistedData(){
   }catch(e){}
   try{
     const sales = JSON.parse(localStorage.getItem('app_sales')||'[]');
-    if(sales.length){ SALES_TRANSACTIONS.push(...sales); _salesNextId=sales.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
+    if(sales.length){ SALES_TRANSACTIONS.length=0; SALES_TRANSACTIONS.push(...sales); _salesNextId=sales.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
   try{
     const adj = JSON.parse(localStorage.getItem('app_adj')||'[]');
@@ -1152,9 +1152,29 @@ const INVENTORY_OPENING = [
   {model:'MX-EX1021WTZ', product:'خلاط باناسونيك 400 واط', openingQty:1, unitCost:1788},
 ];
 
-const SALES_TRANSACTIONS = [];
+const SALES_TRANSACTIONS = [
+  {date:'2026-08-09',platform:'7. Kenzz',model:'AFK-1865',orderNo:'XZVBCP9VZWM7',qty:1,saleAmount:0,status:'Paid',_id:0},
+  {date:'2026-08-09',platform:'7. Kenzz',model:'PAC10K- PbWA',orderNo:'7ATCQKAFE3C4',qty:1,saleAmount:0,status:'Paid',_id:1},
+  {date:'2026-08-09',platform:'7. Kenzz',model:'MC-YL633',orderNo:'VTZCMGC4G5J6',qty:1,saleAmount:0,status:'Paid',_id:2},
+  {date:'2026-08-09',platform:'7. Kenzz',model:'FR BO80M',orderNo:'85R3MPQM5WF5',qty:1,saleAmount:0,status:'Paid',_id:3},
+  {date:'2026-08-09',platform:'4. Raneen',model:'ART012CY50XFR-SG-SER-S1',orderNo:'2010035582',qty:2,saleAmount:0,status:'Paid',_id:4},
+  {date:'2026-08-09',platform:'4. Raneen',model:'AC1185TR',orderNo:'2010032468',qty:1,saleAmount:0,status:'Paid',_id:5},
+  {date:'2026-08-09',platform:'4. Raneen',model:'CFJ-563',orderNo:'2010031136',qty:1,saleAmount:0,status:'Paid',_id:6},
+  {date:'2026-08-09',platform:'3. B Tech',model:'WFS-181',orderNo:'508538647',qty:5,saleAmount:0,status:'Paid',_id:7},
+  {date:'2026-08-09',platform:'3. B Tech',model:'SFJ-211',orderNo:'508527822',qty:3,saleAmount:0,status:'Paid',_id:8},
+  {date:'2026-08-09',platform:'3. B Tech',model:'DST3020',orderNo:'508547773',qty:1,saleAmount:0,status:'Paid',_id:9},
+  {date:'2026-08-09',platform:'3. B Tech',model:'CH-700',orderNo:'508548801',qty:1,saleAmount:0,status:'Paid',_id:10},
+  {date:'2026-08-09',platform:'3. B Tech',model:'TK-CS200',orderNo:'508538609',qty:1,saleAmount:0,status:'Paid',_id:11},
+  {date:'2026-08-09',platform:'3. B Tech',model:'Babyliss 6704E',orderNo:'508553081',qty:1,saleAmount:0,status:'Paid',_id:12},
+  {date:'2026-08-09',platform:'7. Kenzz',model:'ZJM01.AOBK',orderNo:'LWJ2GAZGN8RE',qty:1,saleAmount:0,status:'Paid',_id:13},
+  {date:'2026-08-09',platform:'3. B Tech',model:'HST1500-B5',orderNo:'508551528',qty:1,saleAmount:0,status:'Paid',_id:14},
+  {date:'2026-08-09',platform:'7. Kenzz',model:'HST1500-B5',orderNo:'JKRQQ87NHQDB',qty:1,saleAmount:0,status:'Paid',_id:15},
+  {date:'2026-08-09',platform:'3. B Tech',model:'ST335E',orderNo:'508539650',qty:1,saleAmount:0,status:'Paid',_id:16},
+  {date:'2026-08-09',platform:'3. B Tech',model:'ST397E',orderNo:'508545001',qty:1,saleAmount:0,status:'Paid',_id:17},
+  {date:'2026-08-09',platform:'3. B Tech',model:'CW128-3061',orderNo:'508538497',qty:2,saleAmount:0,status:'Paid',_id:18},
+];
 SALES_TRANSACTIONS.forEach((t,i)=>t._id=i);
-let _salesNextId = SALES_TRANSACTIONS.length;
+let _salesNextId = 19;
 
 const AR_MANUAL_ENTRIES = [];
 let _arNextId = 0;
