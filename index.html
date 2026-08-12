@@ -1018,12 +1018,12 @@ function wireTables(){
 }
 document.addEventListener('DOMContentLoaded',wireTables);
 // ---------- localStorage persistence for Purchasing & Sales ----------
-function persistPO(){ try{ localStorage.setItem('app_po_v2', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
+function persistPO(){ try{ localStorage.setItem('app_po', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
 function persistSales(){ try{ localStorage.setItem('app_sales_v2', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
 function persistAdj(){ try{ localStorage.setItem('app_adj', JSON.stringify(INVENTORY_ADJUSTMENTS)); }catch(e){} }
 function loadPersistedData(){
   try{
-    const po = JSON.parse(localStorage.getItem('app_po_v2')||'[]');
+    const po = JSON.parse(localStorage.getItem('app_po')||'[]');
     if(po.length){ PURCHASE_ORDERS.push(...po); _poNextId=po.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
   try{
