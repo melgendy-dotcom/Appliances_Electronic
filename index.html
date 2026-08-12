@@ -1819,6 +1819,8 @@ function importPurchasing(wb){
     const m = pick(r,['Model No.','Model']);
     return m && m!=='#REF!';
   });
+  const _rawPODate = rows[0] ? pick(rows[0],['Order date','Date','Order date ']) : null;
+  console.log('PO RAW DATE:', _rawPODate, 'type:', typeof _rawPODate, 'isDate:', _rawPODate instanceof Date);
   const parsed = rows.map(r=>({
     date: (()=>{ const d=toJsDate(pick(r,['Order date','Date','Order date '])); return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''; })(),
     supplier: pick(r,['Supplier']) || '—',
@@ -1845,6 +1847,8 @@ function importSalesData(wb){
     return m && String(m).trim() && String(m).trim().toUpperCase()!=='TOTAL' && String(m).trim().toUpperCase()!=='MODEL NO.';
   });
   if(!rows.length){ toast('No rows found — check column headers match the template','err'); return; }
+  const _rawDateVal = rows[0] ? pick(rows[0],['Date','التاريخ','sale date','Sale Date','تاريخ']) : null;
+  console.log('RAW DATE VALUE:', _rawDateVal, 'type:', typeof _rawDateVal, 'isDate:', _rawDateVal instanceof Date);
   const parsed = rows.map(r=>({
     date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''; })(),
     platform: pick(r,['Platform','Channel','Sales Channel','المنصة','القناة','1. Raya']) || '—',
