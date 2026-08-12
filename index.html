@@ -1018,12 +1018,12 @@ function wireTables(){
 }
 document.addEventListener('DOMContentLoaded',wireTables);
 // ---------- localStorage persistence for Purchasing & Sales ----------
-function persistPO(){ try{ localStorage.setItem('app_po', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
+function persistPO(){ try{ localStorage.setItem('app_po_v2', JSON.stringify(PURCHASE_ORDERS)); }catch(e){} }
 function persistSales(){ try{ localStorage.setItem('app_sales_v2', JSON.stringify(SALES_TRANSACTIONS)); }catch(e){} }
 function persistAdj(){ try{ localStorage.setItem('app_adj', JSON.stringify(INVENTORY_ADJUSTMENTS)); }catch(e){} }
 function loadPersistedData(){
   try{
-    const po = JSON.parse(localStorage.getItem('app_po')||'[]');
+    const po = JSON.parse(localStorage.getItem('app_po_v2')||'[]');
     if(po.length){ PURCHASE_ORDERS.push(...po); _poNextId=po.reduce((m,t)=>Math.max(m,(t._id||0)+1),0); }
   }catch(e){}
   try{
@@ -1823,13 +1823,13 @@ function importPurchasing(wb){
     method: pick(r,['Pay Method','Method']) || 'N/A',
     paid: Number(pick(r,['Amount Paid','Paid'])) || 0,
   }));
-  parsed.forEach((p,i)=>p._id=i);
-  _poNextId = parsed.length;
-  PURCHASE_ORDERS.length = 0;
-  PURCHASE_ORDERS.push(...parsed);
+  // Merge by date: remove existing entries for same dates, then add new ones
+  const newDates = new Set(parsed.map(p=>p.date).filter(Boolean));
+  newDates.forEach(d=>{ const keep=PURCHASE_ORDERS.filter(p=>p.date!==d); PURCHASE_ORDERS.length=0; PURCHASE_ORDERS.push(...keep); });
+  parsed.forEach(p=>{ p._id=_poNextId++; PURCHASE_ORDERS.push(p); });
   persistPO();
   renderPurchasingAll();
-  toast('Imported '+parsed.length+' purchase orders — Inventory updated','ok');
+  toast('Imported '+parsed.length+' purchase orders for '+[...newDates].join(', '),'ok');
 }
 
 function importSalesData(wb){
