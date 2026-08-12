@@ -1749,7 +1749,7 @@ function findSheet(wb, keywords){
   }
   return wb.Sheets[wb.SheetNames[0]];
 }
-function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null}); }
+function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null, cellDates:true, UTC:true}); }
 function pick(row, names){ for(const k of names){ if(row[k]!==undefined && row[k]!==null && row[k]!=='') return row[k]; } return null; }
 function toJsDate(v){
   if(v instanceof Date) return v;
@@ -1814,7 +1814,7 @@ function importPurchasing(wb){
     return m && m!=='#REF!';
   });
   const parsed = rows.map(r=>({
-    date: (()=>{ const d=toJsDate(pick(r,['Order date','Date','Order date '])); return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''; })(),
+    date: (()=>{ const d=toJsDate(pick(r,['Order date','Date','Order date '])); return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''; })(),
     supplier: pick(r,['Supplier']) || '—',
     model: pick(r,['Model No.','Model']),
     orderNo: pick(r,['Order Number']) || '',
@@ -1840,7 +1840,7 @@ function importSalesData(wb){
   });
   if(!rows.length){ toast('No rows found — check column headers match the template','err'); return; }
   const parsed = rows.map(r=>({
-    date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''; })(),
+    date: (()=>{ const d=toJsDate(pick(r,['Date','التاريخ','sale date','Sale Date','تاريخ'])); return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''; })(),
     platform: pick(r,['Platform','Channel','Sales Channel','المنصة','القناة','1. Raya']) || '—',
     model: String(pick(r,['Model No.','Model No','Model','model','SKU','Item Code','كود','موديل','رقم الموديل'])||'').trim(),
     orderNo: pick(r,['Order Number','Order No.','Order No','Order #','Order','رقم الاوردر','رقم الطلب']) || '',
