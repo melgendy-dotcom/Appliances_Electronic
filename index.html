@@ -307,7 +307,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="savePO()">✓ Save Purchase Order</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="downloadPurchasingTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><button class="btn-import" style="color:var(--red)" onclick="if(confirm('Clear ALL purchase orders?')){PURCHASE_ORDERS.length=0;_poNextId=0;persistPO();renderPurchasingAll();toast('All purchase orders cleared','ok');}">🗑 Clear All</button><span class="tbl-sub" id="po-sub">0 records</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="downloadPurchasingTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><button class="btn-import" style="color:var(--amber)" onclick="fixPODates()" title="Fix dates that are off by 1 day due to timezone">🔧 Fix Dates</button><button class="btn-import" style="color:var(--red)" onclick="if(confirm('Clear ALL purchase orders?')){PURCHASE_ORDERS.length=0;_poNextId=0;persistPO();renderPurchasingAll();toast('All purchase orders cleared','ok');}">🗑 Clear All</button><span class="tbl-sub" id="po-sub">0 records</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
       <tbody id="tb-po"></tbody>
@@ -1197,6 +1197,20 @@ function aggregatePurchasing(){
     byModel[p.model] = (byModel[p.model]||0) + p.qty;
   });
   return {totalValue, totalPaid, outstanding: totalValue-totalPaid, bySupplier, byModel, supplierCount: Object.keys(bySupplier).length};
+}
+
+function fixPODates(){
+  if(!confirm('This will add 1 day to ALL existing purchase order dates to fix the timezone error. Continue?')) return;
+  PURCHASE_ORDERS.forEach(p=>{
+    if(!p.date) return;
+    const d = new Date(p.date + 'T12:00:00Z'); // noon UTC to avoid any edge case
+    d.setUTCDate(d.getUTCDate() + 1);
+    p.date = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  });
+  persistPO();
+  renderPurchasingAll();
+  renderInventoryAll();
+  toast('All purchase dates shifted +1 day','ok');
 }
 
 function renderPurchasingAll(){
