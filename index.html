@@ -307,7 +307,7 @@ body.locked>*:not(#authGate){display:none}
     <button class="btn-save" onclick="savePO()">✓ Save Purchase Order</button>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…"/><select class="fsel" id="po-filter-supplier"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><button class="btn-import" onclick="downloadPurchasingTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><button class="btn-import" style="color:var(--amber)" onclick="fixPODates()" title="Fix dates that are off by 1 day due to timezone">🔧 Fix Dates</button><button class="btn-import" style="color:var(--red)" onclick="if(confirm('Clear ALL purchase orders?')){PURCHASE_ORDERS.length=0;_poNextId=0;persistPO();renderPurchasingAll();toast('All purchase orders cleared','ok');}">🗑 Clear All</button><span class="tbl-sub" id="po-sub">0 records</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Purchase Orders</div><input class="search-inp" type="text" placeholder="🔍 Search supplier, model…" oninput="renderPurchasingAll()"/><select class="fsel" id="po-filter-supplier" onchange="renderPurchasingAll()"><option>All Suppliers</option></select><select class="fsel" id="po-filter-method" onchange="renderPurchasingAll()"><option>All Methods</option><option>Cash</option><option>Payment Terms</option><option>Bank Transfer</option><option>Cheque</option><option>N/A</option></select><select class="fsel" id="po-filter-date" onchange="renderPurchasingAll()"><option value="">All Dates</option></select><button class="btn-import" onclick="downloadPurchasingTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('po')">📤 Import Excel</button><button class="btn-import" style="color:var(--red)" onclick="if(confirm('Clear ALL purchase orders?')){PURCHASE_ORDERS.length=0;_poNextId=0;persistPO();renderPurchasingAll();toast('All purchase orders cleared','ok');}">🗑 Clear All</button><span class="tbl-sub" id="po-sub">0 records</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Supplier</th><th>Model</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Method</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead>
       <tbody id="tb-po"></tbody>
@@ -418,7 +418,7 @@ body.locked>*:not(#authGate){display:none}
     </table></div>
   </div>
   <div class="tbl-card">
-    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…"/><select class="fsel" id="s-filter-channel"><option>All Platforms</option></select><select class="fsel"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><button class="btn-import" onclick="downloadSalesTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
+    <div class="tbl-toolbar"><div class="tbl-title">Sales Register</div><input class="search-inp" type="text" placeholder="🔍 Search product, platform, order…" oninput="renderSalesAll()"/><select class="fsel" id="s-filter-channel" onchange="renderSalesAll()"><option>All Platforms</option></select><select class="fsel" id="s-filter-status" onchange="renderSalesAll()"><option>All Status</option><option>Paid</option><option>Pending</option><option>Partial</option></select><select class="fsel" id="s-filter-date" onchange="renderSalesAll()"><option value="">All Dates</option></select><button class="btn-import" onclick="downloadSalesTemplate()" title="Download blank template">📥 Template</button><button class="btn-import" onclick="triggerImport('sales')">📤 Import Excel</button><button class="btn-import" style="color:var(--red)" onclick="if(confirm('Clear ALL sales transactions?')){SALES_TRANSACTIONS.length=0;_salesNextId=0;persistSales();renderSalesAll();toast('All sales cleared','ok');}">🗑 Clear All</button><span class="tbl-sub" id="s-sub">0 transactions</span></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Platform</th><th>Model</th><th>Product</th><th>Order #</th><th>Qty</th><th>Sale (EGP)</th><th>Cost (EGP)</th><th>GP (EGP)</th><th>GP%</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="tb-sales"></tbody>
@@ -733,7 +733,7 @@ body.locked>*:not(#authGate){display:none}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-D</span></div>
+  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-E</span></div>
   <div class="footer-meta">Senior GL Accountant · Mohamed Elgendy · IFRS Compliant · EGP</div>
 </footer>
 
@@ -1215,7 +1215,25 @@ function fixPODates(){
 
 function renderPurchasingAll(){
   const agg = aggregatePurchasing();
-  const sorted = [...PURCHASE_ORDERS].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  let sorted = [...PURCHASE_ORDERS].sort((a,b)=> new Date(b.date)-new Date(a.date));
+
+  // Populate date filter dropdown
+  const allDates = [...new Set(PURCHASE_ORDERS.map(p=>p.date).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  const dateSel = document.getElementById('po-filter-date');
+  const datePrev = dateSel.value;
+  dateSel.innerHTML = '<option value="">All Dates</option>'+allDates.map(d=>`<option value="${d}">${fmtDateISO(d)}</option>`).join('');
+  if(allDates.includes(datePrev)) dateSel.value = datePrev;
+
+  // Apply filters
+  const filterDate = dateSel.value;
+  const filterSupplier = document.getElementById('po-filter-supplier').value;
+  const filterMethod = document.getElementById('po-filter-method').value;
+  const searchQ = (document.querySelector('#mod-purchasing .search-inp')||{value:''}).value.trim().toLowerCase();
+  if(filterDate) sorted = sorted.filter(p=>p.date===filterDate);
+  if(filterSupplier && filterSupplier!=='All Suppliers') sorted = sorted.filter(p=>p.supplier===filterSupplier);
+  if(filterMethod && filterMethod!=='All Methods') sorted = sorted.filter(p=>p.method===filterMethod);
+  if(searchQ) sorted = sorted.filter(p=>(p.supplier||'').toLowerCase().includes(searchQ)||(p.model||'').toLowerCase().includes(searchQ));
+
   const rowsHtml = sorted.map(p=>{
     const total = p.qty*p.unitCost, bal = total-(p.paid||0);
     const info = modelLookup()[p.model] || {product:''};
@@ -1251,7 +1269,7 @@ function renderPurchasingAll(){
   supSel.innerHTML = '<option>All Suppliers</option>'+suppliers.map(s=>`<option value="${s}">${s}</option>`).join('');
   if(suppliers.includes(supPrev)) supSel.value = supPrev;
 
-  document.getElementById('po-sub').textContent = PURCHASE_ORDERS.length+' records';
+  document.getElementById('po-sub').textContent = sorted.length===PURCHASE_ORDERS.length ? PURCHASE_ORDERS.length+' records' : sorted.length+' of '+PURCHASE_ORDERS.length+' records';
   renderInventoryAll();
 }
 
@@ -1510,10 +1528,25 @@ function aggregateSales(){
 function renderSalesAll(){
   const agg = aggregateSales();
   const invList = computeInventory();
-  const sorted = [...SALES_TRANSACTIONS].sort((a,b)=> new Date(b.date)-new Date(a.date));
+  let sorted = [...SALES_TRANSACTIONS].sort((a,b)=> new Date(b.date)-new Date(a.date));
   const platformColors = {};
   const palette = ['var(--amber)','var(--blue)','var(--green)','var(--purple)','var(--red)','var(--text2)'];
   [...new Set(SALES_TRANSACTIONS.map(s=>s.platform))].forEach((p,i)=>platformColors[p]=palette[i%palette.length]);
+
+  // Populate date filter dropdown
+  const allSalesDates = [...new Set(SALES_TRANSACTIONS.map(s=>s.date).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  const salesDateSel = document.getElementById('s-filter-date');
+  const salesDatePrev = salesDateSel.value;
+  salesDateSel.innerHTML = '<option value="">All Dates</option>'+allSalesDates.map(d=>`<option value="${d}">${fmtDateISO(d)}</option>`).join('');
+  if(allSalesDates.includes(salesDatePrev)) salesDateSel.value = salesDatePrev;
+
+  // Apply filters
+  const filterSalesDate = salesDateSel.value;
+  const filterSalesStatus = (document.getElementById('s-filter-status')||{value:''}).value;
+  const salesSearchQ = (document.querySelector('#mod-sales .search-inp')||{value:''}).value.trim().toLowerCase();
+  if(filterSalesDate) sorted = sorted.filter(s=>s.date===filterSalesDate);
+  if(filterSalesStatus && filterSalesStatus!=='All Status') sorted = sorted.filter(s=>s.status===filterSalesStatus);
+  if(salesSearchQ) sorted = sorted.filter(s=>(s.model||'').toLowerCase().includes(salesSearchQ)||(s.platform||'').toLowerCase().includes(salesSearchQ)||(s.orderNo||'').toLowerCase().includes(salesSearchQ));
 
   const rowsHtml = sorted.map(s=>{
     const total = s.qty*s.saleAmount;
@@ -1553,7 +1586,7 @@ function renderSalesAll(){
   chSel.innerHTML = '<option>All Platforms</option>'+platforms.map(p=>`<option value="${p}">${p}</option>`).join('');
   if(platforms.includes(chPrev)) chSel.value = chPrev;
 
-  document.getElementById('s-sub').textContent = agg.count+' transactions';
+  document.getElementById('s-sub').textContent = sorted.length===SALES_TRANSACTIONS.length ? agg.count+' transactions' : sorted.length+' of '+agg.count+' transactions';
   renderInventoryAll();
   renderArAll();
 }
@@ -1836,7 +1869,6 @@ function importPurchasing(wb){
     return m && m!=='#REF!';
   });
   const _rawPODate = rows[0] ? pick(rows[0],['Order date','Date','Order date ']) : null;
-  console.log('PO RAW DATE:', _rawPODate, 'type:', typeof _rawPODate, 'isDate:', _rawPODate instanceof Date);
   const parsed = rows.map(r=>({
     date: (()=>{ const d=toJsDate(pick(r,['Order date','Date','Order date '])); return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''; })(),
     supplier: pick(r,['Supplier']) || '—',
