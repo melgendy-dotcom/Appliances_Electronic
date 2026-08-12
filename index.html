@@ -1757,8 +1757,10 @@ function toJsDate(v){
     return new Date((v-25569)*86400000);
   }
   if(v instanceof Date){
-    // SheetJS may return local midnight — normalize to UTC midnight using local components
-    return new Date(Date.UTC(v.getFullYear(), v.getMonth(), v.getDate()));
+    // SheetJS floating-point error can give 23:59:51 instead of 00:00:00
+    // Add 30 min to safely round near-midnight dates to the correct calendar day
+    const nudged = new Date(v.getTime() + 30*60*1000);
+    return new Date(Date.UTC(nudged.getFullYear(), nudged.getMonth(), nudged.getDate()));
   }
   if(typeof v==='string'){ const d=new Date(v); return isNaN(d)?null:d; }
   return null;
