@@ -1749,11 +1749,17 @@ function findSheet(wb, keywords){
   }
   return wb.Sheets[wb.SheetNames[0]];
 }
-function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null, cellDates:true, UTC:true}); }
+function sheetRows(sheet){ return XLSX.utils.sheet_to_json(sheet, {defval:null}); }
 function pick(row, names){ for(const k of names){ if(row[k]!==undefined && row[k]!==null && row[k]!=='') return row[k]; } return null; }
 function toJsDate(v){
-  if(v instanceof Date) return v;
-  if(typeof v==='number' && v>1000){ const d=new Date((v-25569)*86400000); return isNaN(d)?null:d; } // Excel serial
+  if(typeof v==='number' && v>1000){
+    // Excel serial → UTC midnight (no timezone shift)
+    return new Date((v-25569)*86400000);
+  }
+  if(v instanceof Date){
+    // SheetJS may return local midnight — normalize to UTC midnight using local components
+    return new Date(Date.UTC(v.getFullYear(), v.getMonth(), v.getDate()));
+  }
   if(typeof v==='string'){ const d=new Date(v); return isNaN(d)?null:d; }
   return null;
 }
