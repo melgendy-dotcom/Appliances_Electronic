@@ -1200,17 +1200,17 @@ function aggregatePurchasing(){
 }
 
 function fixPODates(){
-  if(!confirm('This will add 1 day to ALL existing purchase order dates to fix the timezone error. Continue?')) return;
+  if(!confirm('Undo the date fix? This will subtract 1 day from ALL purchase dates to restore them.')) return;
   PURCHASE_ORDERS.forEach(p=>{
     if(!p.date) return;
-    const d = new Date(p.date + 'T12:00:00Z'); // noon UTC to avoid any edge case
-    d.setUTCDate(d.getUTCDate() + 1);
+    const d = new Date(p.date + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() - 1);
     p.date = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
   });
   persistPO();
   renderPurchasingAll();
   renderInventoryAll();
-  toast('All purchase dates shifted +1 day','ok');
+  toast('All purchase dates reverted -1 day','ok');
 }
 
 function renderPurchasingAll(){
