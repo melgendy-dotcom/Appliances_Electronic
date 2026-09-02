@@ -733,7 +733,7 @@ body.locked>*:not(#authGate){display:none}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-E</span></div>
+  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-F</span></div>
   <div class="footer-meta">Senior GL Accountant · Mohamed Elgendy · IFRS Compliant · EGP</div>
 </footer>
 
@@ -2401,6 +2401,8 @@ function loadApFromSheet(){
       payment: Number(r['Payment Amount (EGP)'])||0,
       notes: r['Notes']||'',
     }));
+    // Only replace data if we got at least as many rows as before (guards against partial responses)
+    if(parsed.length < AP_TRANSACTIONS.length){ markSyncFailed(); return; }
     parsed.forEach((t,i)=>t._id=i);
     _apNextId = parsed.length;
     AP_TRANSACTIONS.length = 0;
