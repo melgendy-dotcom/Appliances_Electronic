@@ -733,7 +733,7 @@ body.locked>*:not(#authGate){display:none}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-F</span></div>
+  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-G</span></div>
   <div class="footer-meta">Senior GL Accountant · Mohamed Elgendy · IFRS Compliant · EGP</div>
 </footer>
 
@@ -2390,7 +2390,8 @@ function toIsoDate(v){
   return isNaN(d) ? '' : d.toISOString().split('T')[0];
 }
 
-function loadApFromSheet(){
+function loadApFromSheet(retryCount){
+  retryCount = retryCount || 0;
   fetchSheetJSONP('Transaction Log', rows=>{
     const parsed = rows.filter(r=>r['Vendor Name']).map(r=>({
       date: toIsoDate(r['Date']),
@@ -2401,15 +2402,20 @@ function loadApFromSheet(){
       payment: Number(r['Payment Amount (EGP)'])||0,
       notes: r['Notes']||'',
     }));
-    // Only replace data if we got at least as many rows as before (guards against partial responses)
-    if(parsed.length < AP_TRANSACTIONS.length){ markSyncFailed(); return; }
+    // If response looks partial (fewer rows than before, or suspiciously small), retry up to 3 times
+    const prevCount = AP_TRANSACTIONS.length;
+    if(parsed.length < Math.max(prevCount, 100) && retryCount < 3){
+      setTimeout(()=>loadApFromSheet(retryCount+1), 2000);
+      return;
+    }
+    if(parsed.length < Math.max(prevCount, 50)){ markSyncFailed(); return; }
     parsed.forEach((t,i)=>t._id=i);
     _apNextId = parsed.length;
     AP_TRANSACTIONS.length = 0;
     AP_TRANSACTIONS.push(...parsed);
     renderApAll();
     markSynced();
-  }, markSyncFailed);
+  }, ()=>{ if(retryCount<3){ setTimeout(()=>loadApFromSheet(retryCount+1),2000); } else { markSyncFailed(); } });
 }
 
 function loadCashFromSheet(){
