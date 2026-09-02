@@ -733,7 +733,7 @@ body.locked>*:not(#authGate){display:none}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-G</span></div>
+  <div class="footer-logo"><div class="logo-mark" style="width:26px;height:26px;font-size:.65rem">KZ</div><span>Appliances Store — Operations Hub</span> <span style="font-size:.7rem;color:var(--text3);margin-left:8px">v2026.08.12-H</span></div>
   <div class="footer-meta">Senior GL Accountant · Mohamed Elgendy · IFRS Compliant · EGP</div>
 </footer>
 
@@ -2404,8 +2404,8 @@ function loadApFromSheet(retryCount){
     }));
     // If response looks partial (fewer rows than before, or suspiciously small), retry up to 3 times
     const prevCount = AP_TRANSACTIONS.length;
-    if(parsed.length < Math.max(prevCount, 100) && retryCount < 3){
-      setTimeout(()=>loadApFromSheet(retryCount+1), 2000);
+    if(parsed.length < Math.max(prevCount, 150) && retryCount < 5){
+      setTimeout(()=>loadApFromSheet(retryCount+1), 4000);
       return;
     }
     if(parsed.length < Math.max(prevCount, 50)){ markSyncFailed(); return; }
@@ -2415,7 +2415,7 @@ function loadApFromSheet(retryCount){
     AP_TRANSACTIONS.push(...parsed);
     renderApAll();
     markSynced();
-  }, ()=>{ if(retryCount<3){ setTimeout(()=>loadApFromSheet(retryCount+1),2000); } else { markSyncFailed(); } });
+  }, ()=>{ if(retryCount<5){ setTimeout(()=>loadApFromSheet(retryCount+1),4000); } else { markSyncFailed(); } });
 }
 
 function loadCashFromSheet(){
@@ -2480,6 +2480,9 @@ function syncAllSheets(){
 
 document.addEventListener('DOMContentLoaded',()=>{
   syncAllSheets();
+  // Warm-up retry: Google Apps Script often returns partial data on cold start.
+  // A second attempt 12 seconds later catches it after it's warmed up.
+  setTimeout(syncAllSheets, 12000);
   setInterval(syncAllSheets, SHEETS_REFRESH_MS);
 });
 </script>
